@@ -1,5 +1,5 @@
-Documentation for the Code
-**************************
+Documentation for pdfebc
+************************
 
 .. automodule:: pdfebc
 
