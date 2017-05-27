@@ -1,10 +1,10 @@
-"""Module containint util functions for the PDFEBC project.
+"""Module containing util functions for the pdfebc program.
 
-Uses Google's SMTP server for sending emails. If you wish to use another server, simply change
-the SMTP_SERVER variable.
+It uses Google's SMTP server for sending emails. If you wish to use another server, simply change
+the SMTP_SERVER variable to your preferred server.
 
 Requires a config file in $HOME/.config/pdfebc/config.ini that should look like:
-    [EMAIL]
+    [email]
     user = sender_email
     pass = password
     reciever = reciever_email
@@ -12,7 +12,11 @@ Requires a config file in $HOME/.config/pdfebc/config.ini that should look like:
 All characters after the colon and whitespace (as much whitespace as you'd like) until
 EOL counts as the username/password.
 
-Author: Simon Larsén
+.. module:: utils
+    :platform: Unix
+    :synopsis: Core functions for pdfebc.
+
+.. moduleauthor:: Simon Larsén <slarse@kth.se>
 """
 import smtplib
 import os
@@ -24,16 +28,20 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 
 CONFIG_RELATIVE_PATH = ".config/pdfebc/config.ini"
-SECTION_KEY = "EMAIL"
+SECTION_KEY = "email"
 PASSWORD_KEY = "pass"
 USER_KEY = "user"
 RECIEVER_KEY = "reciever"
 SMTP_SERVER = "smtp.gmail.com"
 
 def read_email_config(config_relative_path=CONFIG_RELATIVE_PATH):
-    """Return the contents of the config file.
+    """Read the email config file.
 
-    config_relative_path -- Relative path to the email config file.
+    Args:
+        config_relative_path (str): Relative path to the email config file.
+
+    Returns:
+        (str, str, str): User email, user password and reciever email.
     """
     home = os.path.expanduser("~")
     config_path = os.path.join(home, config_relative_path)
@@ -45,7 +53,19 @@ def read_email_config(config_relative_path=CONFIG_RELATIVE_PATH):
     return user, password, reciever
 
 def try_get_conf(config, section, attribute):
-    """Try to parse an attribute of the config file."""
+    """Try to parse an attribute of the config file.
+
+    Args:
+        config (configparser.ConfigParser): A ConfigParser.
+        section (str): The section of the config file to get information from.
+        attribute (str): The attribute of the section to fetch.
+
+    Returns:
+        str: The string corresponding to the section and attribute.
+
+    Raises:
+        ValueError
+    """
     try:
         return config[section][attribute]
     except KeyError:
@@ -55,10 +75,10 @@ def try_get_conf(config, section, attribute):
 def send_with_attachments_autoconf(subject, message, filepaths):
     """Send an email with the user, password and reciever defined in config.ini.
 
-    Arguments:
-    subject -- Subject of the email.
-    message -- A message.
-    filepaths -- Filepaths to files to be attached.
+    Args:
+        subject (str): Subject of the email.
+        message (str): A message.
+        filepaths (list(str)): Filepaths to files to be attached.
     """
     user, password, reciever = read_email_config()
     send_with_attachments(user, password, reciever, subject, message, filepaths)
@@ -66,46 +86,58 @@ def send_with_attachments_autoconf(subject, message, filepaths):
 def send_with_attachments(sender, password, reciever, subject, message, filepaths):
     """Send an email from the sender (a gmail) to the reciever.
 
-    sender -- A Google Mail address.
-    password -- The password to the 'sender' address.
-    reciever -- The recievers' email address.
-    subject -- Subject of the email.
-    message -- A message.
-    filepaths -- Filepaths to files to be attached.
+    Args:
+        sender (str): The sender's email address.
+        password (str): The password to the 'sender' address.
+        reciever (str): The reciever's email address.
+        subject (str): Subject of the email.
+        message (str): A message.
+        filepaths (list(str)): Filepaths to files to be attached.
     """
-    email = MIMEMultipart()
-    email.attach(MIMEText(message))
-    email["Subject"] = subject
-    email["From"] = sender
-    email["To"] = reciever
-    attach_files(filepaths, email)
-    send_email(sender, password, email)
+    email_ = MIMEMultipart()
+    email_.attach(MIMEText(message))
+    email_["Subject"] = subject
+    email_["From"] = sender
+    email_["To"] = reciever
+    attach_files(filepaths, email_)
+    send_email(sender, password, email_)
 
 
-def attach_files(filepaths, message):
-    """Take a list of filepaths and attach the files to a MIMEMultipart."""
+def attach_files(filepaths, email_):
+    """Take a list of filepaths and attach the files to a MIMEMultipart.
+
+    Args:
+        filepaths (list(str)): A list of filepaths.
+        email_ (email.MIMEMultipart): A MIMEMultipart email_.
+    """
     for filepath in filepaths:
         base = os.path.basename(filepath)
         with open(filepath, "rb") as file:
             part = MIMEApplication(file.read(), Name=base)
             part["Content-Disposition"] = f'attachment; filename="{base}"'
-            message.attach(part)
+            email_.attach(part)
 
-def send_email(user, password, email):
-    """Sends the email."""
+def send_email(user, password, email_):
+    """Send an email.
+
+    Args:
+        user (str): Sender's email address.
+        password (str): Password to sender's email.
+        email_ (email.MIMEMultipart): The email to send.
+    """
     server = smtplib.SMTP(SMTP_SERVER, 587)
     server.starttls()
     server.login(user, password)
-    server.send_message(email)
+    server.send_message(email_)
     server.quit()
 
 def send_files_preconf(filepaths):
-    """Email files using the config.ini settings.
+    """Send files using the config.ini settings.
 
-    Arguments:
-    filepaths -- A list of filepaths.
+    Args:
+        filepaths (list(str)): A list of filepaths.
     """
-    user, password, reciever = read_email_config(CONFIG_RELATIVE_PATH)
+    user, password, reciever = read_mail_config(CONFIG_RELATIVE_PATH)
     subject = "PDF files from pdfebc"
     message = ""
     send_with_attachments(
@@ -113,9 +145,17 @@ def send_files_preconf(filepaths):
         )
 
 def make_output_directory(path):
-    """Create the output directory."""
+    """Create the output directory.
+
+    Args:
+        path (str): Path to the directory.
+    """
     subprocess.call(["mkdir", "-p", path])
 
 def rm_r(path):
-    """Recursive remove starting from 'path'."""
+    """Recursive remove starting from 'path'.
+
+    Args:
+        path (str): Path to the directory.
+    """
     subprocess.call(['rm', '-r', path])

@@ -1,6 +1,10 @@
-"""This module contains the cli for the PDFEBC project.
+"""This module contains the argument parser for the pdfebc program.
 
-Author: Simon Larsén
+.. module:: cli
+    :platform: Unix
+    :synopsis: The pdfebc CLI.
+
+.. moduleauthor:: Simon Larsén <slarse@kth.se>
 """
 import argparse
 
@@ -9,7 +13,10 @@ SOURCE_DIR_DEFAULT = "."
 GHOSTSCRIPT_BINARY_DEFAULT = "gs"
 
 def create_argparser():
-    """Return the argument parser for PDFEBC."""
+    """
+    Returns:
+        argparse.ArgumentParser: The argument parser for pdfebc.
+    """
     parser = argparse.ArgumentParser(
         description="Compresses all pdf files in the current directory"
         )

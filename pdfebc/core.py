@@ -1,6 +1,11 @@
-"""Core functions of PDFEBC.
+"""This module contains the core functions of the pdfebc program. These consist mostly
+of functions that manipulate PDF files and the file system.
 
-Author: Simon Larsén
+.. module:: core
+    :platform: Unix
+    :synopsis: Core functions for pdfebc.
+
+.. moduleauthor:: Simon Larsén <slarse@kth.se>
 """
 import os
 import sys
@@ -11,10 +16,16 @@ FILE_SIZE_LOWER_LIMIT = BYTES_PER_MEGABYTE
 PDF_EXTENSION = ".pdf"
 
 def get_pdf_filenames_at(source_directory):
-    """Return a list of paths to the PDF files in specified directory.
+    """Find all PDF files in the specified directory.
 
-    Arguments:
-    source_directory -- The source directory
+    Args:
+        source_directory (str): The source directory.
+
+    Returns:
+        list(str): Filepaths to all PDF files in the specified directory.
+
+    Raises:
+        ValueError
     """
     if not os.path.isdir(source_directory):
         raise ValueError(f"{source_directory} is not a directory!")
@@ -25,10 +36,16 @@ def get_pdf_filenames_at(source_directory):
 def compress_pdf(filepath, output_path, ghostscript_binary):
     """Compress a single PDF file.
 
-    Arguments:
-    filepath -- Path to the PDF file.
-    output_path -- Output path.
-    ghostscript_binary -- Name/alias of the Ghostscript binary.
+    Args:
+        filepath (str): Path to the PDF file.
+        output_path (str): Output path.
+        ghostscript_binary (str): Name/alias of the Ghostscript binary.
+
+    Returns:
+        (str, str): stdout and stderr from the Ghostrscript process.
+
+    Raises:
+        ValueError
     """
     if not filepath.endswith(PDF_EXTENSION):
         raise ValueError("Filename must end with .pdf!\n%s does not." % filepath)
@@ -49,15 +66,18 @@ def compress_pdf(filepath, output_path, ghostscript_binary):
     return process.communicate()
 
 def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binary):
-    """Compress all PDF files in the current directory and
-    place the output in the given output directory.
+    """Compress all PDF files in the current directory and place the output in the given output directory.
 
-    Return the filepaths to the compressed PDFs.
+    Args:
+        source_directory (str): Filepath to the source directory.
+        output_directory (str): Filepath to the output directory.
+        ghostscript_binary (str): Name of the Ghostscript binary.
 
-    Arguments:
-    source_directory -- Filepath to the source directory.
-    output_directory -- Filepath to the output directory.
-    ghostscript_binary -- Name of the Ghostscript binary
+    Returns:
+        list(str): paths to outputs.
+
+    Raises:
+        ValueError
     """
     source_paths = get_pdf_filenames_at(source_directory)
     out_paths = list()
@@ -72,7 +92,10 @@ def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binar
 def handle_output(out):
     """Handle output from call to Ghostscript
 
-    out -- stdout from Ghostscript.
+    .. warning:: Not implemented!
+
+    Args:
+        out (str): stdout from Ghostscript.
     """
     #TODO Implement
     return
@@ -80,7 +103,10 @@ def handle_output(out):
 def handle_errors(err):
     """Handle output from call to Ghostscript
 
-    err -- stderr from Ghostscript.
+    .. warning:: Not implemented!
+
+    Args:
+        err (str): stderr from Ghostscript.
     """
     #TODO Implement
     return
