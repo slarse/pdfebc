@@ -1,3 +1,5 @@
 sphinx
 sphinxcontrib-napoleon
 pytest
+pytest-cov
+codecov
