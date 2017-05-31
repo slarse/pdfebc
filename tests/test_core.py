@@ -28,11 +28,12 @@ def create_temporary_files_with_suffixes(directory, suffixes=[PDF_FILE_EXTENSION
                  for i in range(files_per_suffix) for suffix in suffixes]
     return filepaths
 
-def create_tempo(directory, suffixes=OTHER_FILE_EXTENSIONS, amount=20):
-    """Create an arbitrary amount of tempfile.NamedTemporaryFile files with file exte"""
-
-
 class CoreTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.trash_can = tempfile.TemporaryDirectory()
+        cls.default_trash_file = os.path.join(cls.trash_can.name, 'default')
+
     def test_get_pdf_filenames_from_empty_dir(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             filepaths = pdfebc.core.get_pdf_filenames_at(tmpdir)
@@ -64,6 +65,23 @@ class CoreTest(unittest.TestCase):
             non_pdf_files = create_temporary_files_with_suffixes(tmpdir, suffixes=OTHER_FILE_EXTENSIONS)
             filepaths = pdfebc.core.get_pdf_filenames_at(tmpdir)
             self.assert_filepaths_match_file_names(filepaths, pdf_files)
+
+    def test_compress_non_pdf_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            non_pdf_file = create_temporary_files_with_suffixes(tmpdir,
+                                                                suffixes=OTHER_FILE_EXTENSIONS,
+                                                                files_per_suffix=1).pop()
+            non_pdf_filename = non_pdf_file.name
+            with self.assertRaises(ValueError) as context:
+                pdfebc.core.compress_pdf(non_pdf_filename,
+                                         self.default_trash_file,
+                                         pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT)
+
+    def test_compress_pdf_that_does_not_exist(self):
+        with tempfile.NamedTemporaryFile() as file:
+            filename = file.name
+        with self.assertRaises(ValueError) as context:
+            pdfebc.core.compress_pdf(filename, self.default_trash_file, pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT)
 
     def assert_filepaths_match_file_names(self, filepaths, temporary_files):
         """Assert that a list of filepaths match a list of temporary files.
