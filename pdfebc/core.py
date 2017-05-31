@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This module contains the core functions of the pdfebc program. These consist mostly
 of functions that manipulate PDF files and the file system.
 

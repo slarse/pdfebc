@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Main module for the PDFEBC project.
 
 Author: Simon Larsén

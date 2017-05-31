@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Module containing util functions for the pdfebc program.
 
 It uses Google's SMTP server for sending emails. If you wish to use another server, simply change

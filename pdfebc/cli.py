@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This module contains the argument parser for the pdfebc program.
 
 .. module:: cli
