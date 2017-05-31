@@ -1,8 +1,8 @@
 # PDFEBC - PDF ebook compressor
 
-[![Build Status](https://travis-ci.org/slarse/pdfebc.svg?branch=master)](https://travis-ci.org/slarse/pdfebc)|
-[![codecov](https://codecov.io/gh/slarse/pdfebc/branch/master/graph/badge.svg)](https://codecov.io/gh/slarse/pdfebc)|
-![readthedocs](https://readthedocs.org/projects/pdfebc/badge/?version=latest)
+[![Build Status](https://travis-ci.org/slarse/pdfebc.svg?branch=master)](https://travis-ci.org/slarse/pdfebc)
+[![codecov](https://codecov.io/gh/slarse/pdfebc/branch/master/graph/badge.svg)](https://codecov.io/gh/slarse/pdfebc)
+[![Documentation Status](https://readthedocs.org/projects/pdfebc/badge/?version=latest)](http://pdfebc.readthedocs.io/en/latest/?badge=latest)
 
 [Docs](http://pdfebc.readthedocs.io/en/latest/)
 
