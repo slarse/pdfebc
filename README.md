@@ -1,7 +1,10 @@
 # PDFEBC - PDF ebook compressor
 
 ![Build Status](https://travis-ci.org/slarse/pdfebc.svg?branch=master)|
-[![codecov](https://codecov.io/gh/slarse/pdfebc/branch/master/graph/badge.svg)](https://codecov.io/gh/slarse/pdfebc)
+[![codecov](https://codecov.io/gh/slarse/pdfebc/branch/master/graph/badge.svg)](https://codecov.io/gh/slarse/pdfebc)|
+![readthedocs](https://readthedocs.org/projects/pdfebc/badge/?version=latest)
+
+[Docs](http://pdfebc.readthedocs.io/en/latest/)
 
 ## Overview
 PDFEBC is a CLI tool that uses Ghostscript to compress PDF documents to a size
