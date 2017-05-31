@@ -15,12 +15,6 @@ cli
 .. automodule:: pdfebc.cli
     :members:
 
-main
-===================
-
-.. automodule:: pdfebc.main
-    :members:
-
 utils
 ===================
 
