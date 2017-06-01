@@ -73,23 +73,12 @@ def try_get_conf(config, section, attribute):
         raise ValueError("""Config file badly formed!\n
                 Failed to get attribute '%s' from section '%s'!""" % (attribute, section))
 
-def send_with_attachments_autoconf(subject, message, filepaths):
-    """Send an email with the user, password and reciever defined in config.ini.
+def send_with_attachments(user, password, reciever, subject, message, filepaths):
+    """Send an email from the user (a gmail) to the reciever.
 
     Args:
-        subject (str): Subject of the email.
-        message (str): A message.
-        filepaths (list(str)): Filepaths to files to be attached.
-    """
-    user, password, reciever = read_email_config()
-    send_with_attachments(user, password, reciever, subject, message, filepaths)
-
-def send_with_attachments(sender, password, reciever, subject, message, filepaths):
-    """Send an email from the sender (a gmail) to the reciever.
-
-    Args:
-        sender (str): The sender's email address.
-        password (str): The password to the 'sender' address.
+        user (str): The sender's email address.
+        password (str): The password to the 'user' address.
         reciever (str): The reciever's email address.
         subject (str): Subject of the email.
         message (str): A message.
@@ -98,10 +87,10 @@ def send_with_attachments(sender, password, reciever, subject, message, filepath
     email_ = MIMEMultipart()
     email_.attach(MIMEText(message))
     email_["Subject"] = subject
-    email_["From"] = sender
+    email_["From"] = user
     email_["To"] = reciever
     attach_files(filepaths, email_)
-    send_email(sender, password, email_)
+    send_email(user, password, email_)
 
 
 def attach_files(filepaths, email_):
