@@ -133,19 +133,3 @@ def send_files_preconf(filepaths):
     send_with_attachments(
         user, password, reciever, subject, message, filepaths
         )
-
-def make_output_directory(path):
-    """Create the output directory.
-
-    Args:
-        path (str): Path to the directory.
-    """
-    subprocess.call(["mkdir", "-p", path])
-
-def rm_r(path):
-    """Recursive remove starting from 'path'.
-
-    Args:
-        path (str): Path to the directory.
-    """
-    subprocess.call(['rm', '-r', path])
