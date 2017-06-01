@@ -5,9 +5,7 @@ Author: Simon Larsén
 """
 import os
 import shutil
-import cli
-import core
-import utils
+from . import cli, core, utils
 
 def main():
     """Run PDFEBC."""
