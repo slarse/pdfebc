@@ -22,11 +22,11 @@ def create_argparser():
         description="Compresses all pdf files in the current directory"
         )
     parser.add_argument(
-        "-o", "--outdir", help=f"Output directory. If not specified, default is '{OUTPUT_DIR_DEFAULT}'", type=str,
+        "-o", "--outdir", help="Output directory. If not specified, default is '%s'" % OUTPUT_DIR_DEFAULT, type=str,
         default=OUTPUT_DIR_DEFAULT
         )
     parser.add_argument(
-        "-src", "--sourcedir", help=f"Source directory. Default is '{SOURCE_DIR_DEFAULT}'", type=str,
+        "-src", "--sourcedir", help="Source directory. Default is '%s'" % SOURCE_DIR_DEFAULT, type=str,
         default=SOURCE_DIR_DEFAULT
         )
     parser.add_argument(
@@ -34,7 +34,7 @@ def create_argparser():
         action="store_true"
         )
     parser.add_argument(
-        "-gs", "--ghostscript", help=f"Specify the name of the Ghostscript binary. Default is '{GHOSTSCRIPT_BINARY_DEFAULT}'.",
+        "-gs", "--ghostscript", help="Specify the name of the Ghostscript binary. Default is '%s'." % GHOSTSCRIPT_BINARY_DEFAULT,
         type=str, default=GHOSTSCRIPT_BINARY_DEFAULT
         )
     parser.add_argument(

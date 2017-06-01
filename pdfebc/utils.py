@@ -70,8 +70,8 @@ def try_get_conf(config, section, attribute):
     try:
         return config[section][attribute]
     except KeyError:
-        raise ValueError(f"""Config file badly formed!
-                \nFailed to get attribute '{attribute}' from section '{section}'!""")
+        raise ValueError("""Config file badly formed!\n
+                Failed to get attribute '%s' from section '%s'!""" % (attribute, section))
 
 def send_with_attachments_autoconf(subject, message, filepaths):
     """Send an email with the user, password and reciever defined in config.ini.
@@ -115,7 +115,7 @@ def attach_files(filepaths, email_):
         base = os.path.basename(filepath)
         with open(filepath, "rb") as file:
             part = MIMEApplication(file.read(), Name=base)
-            part["Content-Disposition"] = f'attachment; filename="{base}"'
+            part["Content-Disposition"] = 'attachment; filename="%s"' % base
             email_.attach(part)
 
 def send_email(user, password, email_):
@@ -138,7 +138,7 @@ def send_files_preconf(filepaths):
     Args:
         filepaths (list(str)): A list of filepaths.
     """
-    user, password, reciever = read_mail_config(CONFIG_RELATIVE_PATH)
+    user, password, reciever = read_email_config(CONFIG_RELATIVE_PATH)
     subject = "PDF files from pdfebc"
     message = ""
     send_with_attachments(

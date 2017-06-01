@@ -29,7 +29,7 @@ def get_pdf_filenames_at(source_directory):
         ValueError
     """
     if not os.path.isdir(source_directory):
-        raise ValueError(f"{source_directory} is not a directory!")
+        raise ValueError("%s is not a directory!" % source_directory)
     return [os.path.join(source_directory, filename)
             for filename in os.listdir(source_directory)
             if filename.endswith(PDF_EXTENSION)]
@@ -53,16 +53,16 @@ def compress_pdf(filepath, output_path, ghostscript_binary):
     try:
         file_size = os.stat(filepath).st_size
         if file_size < FILE_SIZE_LOWER_LIMIT:
-            process = subprocess.Popen(['cp', f'{filepath}', f'{output_path}'])
+            process = subprocess.Popen(['cp', filepath, output_path])
         else:
             process = subprocess.Popen(
-                [f"{ghostscript_binary}", "-sDEVICE=pdfwrite",
+                [ghostscript_binary, "-sDEVICE=pdfwrite",
                  "-dCompatabilityLevel=1.4", "-dPDFSETTINGS=/ebook",
                  "-dNOPAUSE", "-dQUIET", "-dBATCH",
-                 f"-sOutputFile={output_path}", filepath]
+                 "-sOutputFile=%s" % output_path, filepath]
                 )
     except FileNotFoundError:
-        print(f"\nGhostscript not installed or not aliased to {ghostscript_binary}\n")
+        print("\nGhostscript not installed or not aliased to %s\n" % ghostscript_binary)
         sys.exit(1)
     return process.communicate()
 
