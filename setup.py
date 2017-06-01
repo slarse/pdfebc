@@ -16,5 +16,6 @@ setup(
     author_email='slarse@kth.se',
     url='https://github.com/slarse/pdfebc',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests', 'docs')),
+    scripts=['bin/pdfebc']
 )
