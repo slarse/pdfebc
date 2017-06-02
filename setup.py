@@ -7,6 +7,9 @@ with open('README.md') as f:
 with open('LICENSE') as f:
     license = f.read()
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 setup(
     name='pdfebc',
     version='0.0.1',
@@ -17,5 +20,6 @@ setup(
     url='https://github.com/slarse/pdfebc',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
-    scripts=['bin/pdfebc']
+    scripts=['bin/pdfebc'],
+    install_requires=required
 )
