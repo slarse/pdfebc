@@ -22,13 +22,12 @@ EOL counts as the username/password.
 import smtplib
 import os
 import configparser
-import subprocess
-
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
+import appdirs
 
-CONFIG_RELATIVE_PATH = ".config/pdfebc/config.ini"
+CONFIG_PATH = os.path.join(appdirs.user_config_dir('pdfebc'), 'email.cnf')
 SECTION_KEY = "email"
 PASSWORD_KEY = "pass"
 USER_KEY = "user"
@@ -62,17 +61,20 @@ def write_config(config, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         config.write(f)
 
-def read_email_config(config_relative_path=CONFIG_RELATIVE_PATH):
+def read_email_config(config_path=CONFIG_PATH):
     """Read the email config file.
 
     Args:
-        config_relative_path (str): Relative path to the email config file.
+        config_path (str): Relative path to the email config file.
 
     Returns:
         (str, str, str): User email, user password and reciever email.
+
+    Raises:
+        IOError
     """
-    home = os.path.expanduser("~")
-    config_path = os.path.join(home, config_relative_path)
+    if not os.path.isfile(config_path):
+        raise IOError("No config file found at %s" % config_path)
     config = configparser.ConfigParser()
     config.read(config_path)
     user = try_get_conf(config, SECTION_KEY, USER_KEY)
@@ -92,12 +94,12 @@ def try_get_conf(config, section, attribute):
         str: The string corresponding to the section and attribute.
 
     Raises:
-        ValueError
+        configparser.ParseError
     """
     try:
         return config[section][attribute]
     except KeyError:
-        raise ValueError("""Config file badly formed!\n
+        raise configparser.ParsingError("""Config file badly formed!\n
                 Failed to get attribute '%s' from section '%s'!""" % (attribute, section))
 
 def send_with_attachments(user, password, reciever, subject, message, filepaths):
@@ -154,9 +156,29 @@ def send_files_preconf(filepaths):
     Args:
         filepaths (list(str)): A list of filepaths.
     """
-    user, password, reciever = read_email_config(CONFIG_RELATIVE_PATH)
+    user, password, reciever = read_email_config(CONFIG_PATH)
     subject = "PDF files from pdfebc"
     message = ""
     send_with_attachments(
         user, password, reciever, subject, message, filepaths
         )
+
+def valid_config_exists(config_path=CONFIG_PATH):
+    """Verify that a valid config file exists.
+
+    Args:
+        config_path (str): Path to the config file.
+
+    Returns:
+        boolean: True if there is a valid config file, false if not.
+    """
+    if (os.path.isfile(config_path)):
+        try:
+            read_email_config(config_path)
+        except configparser.ParsingError:
+            return False
+    else:
+        return False
+    return True
+
+
