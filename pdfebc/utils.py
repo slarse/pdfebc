@@ -35,6 +35,33 @@ USER_KEY = "user"
 RECIEVER_KEY = "reciever"
 SMTP_SERVER = "smtp.gmail.com"
 
+def create_email_config(user, password, reciever):
+    """Create an email config.
+
+    Args:
+        user (str): User e-mail address.
+        password (str): Password to user e-mail address.
+        reciever: Reciever e-mail address.
+
+    Returns:
+        configparser.ConfigParser: A ConfigParser
+    """
+    config = configparser.ConfigParser()
+    config[SECTION_KEY] = {
+        USER_KEY: user,
+        PASSWORD_KEY: password,
+        RECIEVER_KEY: reciever}
+    return config
+
+def write_config(config, output_path):
+    """Write the config to the output path.
+
+    Args:
+        config (configparser.ConfigParser): A ConfigParser.
+    """
+    with open(output_path, 'w', encoding='utf-8') as f:
+        config.write(f)
+
 def read_email_config(config_relative_path=CONFIG_RELATIVE_PATH):
     """Read the email config file.
 
