@@ -8,6 +8,7 @@ with open('LICENSE') as f:
     license = f.read()
 
 test_requirements = ['pytest', 'pytest-cov']
+required = ['appdirs']
 
 setup(
     name='pdfebc',
@@ -20,5 +21,6 @@ setup(
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     scripts=['bin/pdfebc'],
-    tests_require=test_requirements
+    tests_require=test_requirements,
+    install_requires=required
 )
