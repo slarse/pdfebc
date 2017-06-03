@@ -8,6 +8,7 @@
 .. moduleauthor:: Simon Larsén <slarse@kth.se>
 """
 import argparse
+import sys
 
 OUTPUT_DIR_DEFAULT = "pdfebc_out"
 SOURCE_DIR_DEFAULT = "."
@@ -47,3 +48,23 @@ def create_argparser():
         action='store_true'
         )
     return parser
+
+def prompt_for_config_values():
+    """Prompt the user for the user, password and reciever values for the config.
+
+    Returns:
+        str, str, str: user e-mail, user password and reciever e-mail (or whatever the user enters
+        when prompted for these).
+    """
+    print("""The 'send' functionality requires an e-mail configuration file, and I can't find one!
+    Please follow the instructions to create a configuration file. Please note that all of the
+    information must be filled in, nothing can be left empty!\n""")
+    user = input("Please enter the sender's e-mail address: ")
+    password = input("Please enter the password for the sender's e-mail address: ")
+    reciever = input("Please enter the reciever's email address: ")
+    if not user or not password or not reciever:
+        print("""One or more fields were left empty! I'm gonna crash now, re-run the program and
+        try again. And be more careful this time.""")
+        sys.exit(1)
+    print("Everything looks spiffy, thank you!")
+    return user, password, reciever
