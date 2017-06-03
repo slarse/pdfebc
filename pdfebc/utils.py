@@ -4,11 +4,14 @@
 It uses Google's SMTP server for sending emails. If you wish to use another server, simply change
 the SMTP_SERVER variable to your preferred server.
 
-Requires a config file in $HOME/.config/pdfebc/config.ini that should look like:
-    [email]
-    user = sender_email
-    pass = password
-    reciever = reciever_email
+Requires a config file called 'email.cnf' in the user conf directory specified by appdirs. In the
+case of Arch Linux, this is '$HOME/.config/pdfebc/email.cnf', but this may vary with distributions.
+The config file should have the following format:
+
+    |[EMAIL]
+    |user = sender_email
+    |pass = password
+    |reciever = reciever_email
 
 All characters after the colon and whitespace (as much whitespace as you'd like) until
 EOL counts as the username/password.
@@ -52,13 +55,16 @@ def create_email_config(user, password, reciever):
         RECIEVER_KEY: reciever}
     return config
 
-def write_config(config, output_path):
+def write_config(config, config_path=CONFIG_PATH):
     """Write the config to the output path.
+    Creates the necessary directories if they aren't there.
 
     Args:
         config (configparser.ConfigParser): A ConfigParser.
     """
-    with open(output_path, 'w', encoding='utf-8') as f:
+    if not os.path.exists(config_path):
+        os.makedirs(os.path.dirname(config_path))
+    with open(config_path, 'w', encoding='utf-8') as f:
         config.write(f)
 
 def read_email_config(config_path=CONFIG_PATH):
@@ -180,5 +186,3 @@ def valid_config_exists(config_path=CONFIG_PATH):
     else:
         return False
     return True
-
-
