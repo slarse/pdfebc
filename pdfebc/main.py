@@ -15,6 +15,10 @@ def main():
         os.makedirs(args.outdir)
     filepaths = core.compress_multiple_pdfs(args.sourcedir, args.outdir, args.ghostscript)
     if args.send:
+        if not utils.valid_config_exists():
+            user, password, reciever = cli.prompt_for_config_values()
+            config = utils.create_email_config(user, password, reciever)
+            utils.write_config(config)
         utils.send_files_preconf(filepaths)
     if args.clean:
         shutil.rmtree(args.outdir)
