@@ -7,8 +7,7 @@ with open('README.md') as f:
 with open('LICENSE') as f:
     license = f.read()
 
-with open('requirements.txt') as f:
-    required = f.read().splitlines()
+test_requirements = ['pytest', 'pytest-cov']
 
 setup(
     name='pdfebc',
@@ -21,5 +20,5 @@ setup(
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     scripts=['bin/pdfebc'],
-    install_requires=required
+    tests_require=test_requirements
 )
