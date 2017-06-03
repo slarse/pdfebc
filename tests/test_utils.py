@@ -33,6 +33,9 @@ class UtilsTest(unittest.TestCase):
         cls.valid_config = pdfebc.utils.create_email_config(cls.expected_user,
                                                             cls.expected_password,
                                                             cls.expected_reciever)
+        cls.invalid_config = configparser.ConfigParser()
+        cls.invalid_config[pdfebc.utils.SECTION_KEY] = {pdfebc.utils.USER_KEY: cls.expected_user,
+                                                        pdfebc.utils.PASSWORD_KEY: cls.expected_password}
 
     @classmethod
     def tearDown(cls):
@@ -40,15 +43,6 @@ class UtilsTest(unittest.TestCase):
         os.unlink(cls.temp_config_file.name)
         for filename in cls.attachment_filenames:
             os.unlink(filename)
-
-    def test_read_valid_email_config(self):
-        self.valid_config.write(self.temp_config_file)
-        self.temp_config_file.flush()
-        self.temp_config_file.close()
-        actual_user, actual_password, actual_reciever = pdfebc.utils.read_email_config(self.temp_config_file.name)
-        self.assertEqual(self.expected_user, actual_user)
-        self.assertEqual(self.expected_password, actual_password)
-        self.assertEqual(self.expected_reciever, actual_reciever)
 
     def test_write_valid_email_config(self):
         self.temp_config_file.close()
@@ -61,17 +55,30 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(self.expected_password, section[pdfebc.utils.PASSWORD_KEY])
         self.assertEqual(self.expected_reciever, section[pdfebc.utils.RECIEVER_KEY])
 
-    def test_read_empty_email_config(self):
-        with self.assertRaises(ValueError) as context:
-            pdfebc.utils.read_email_config(self.temp_config_file.name)
-
-    def test_read_email_config_without_reciever(self):
-        config = configparser.ConfigParser()
-        config[pdfebc.utils.SECTION_KEY] = {'user': self.expected_user, 'pass': self.expected_password}
-        config.write(self.temp_config_file)
+    def test_read_valid_email_config(self):
+        self.valid_config.write(self.temp_config_file)
         self.temp_config_file.flush()
         self.temp_config_file.close()
-        with self.assertRaises(ValueError) as context:
+        actual_user, actual_password, actual_reciever = pdfebc.utils.read_email_config(self.temp_config_file.name)
+        self.assertEqual(self.expected_user, actual_user)
+        self.assertEqual(self.expected_password, actual_password)
+        self.assertEqual(self.expected_reciever, actual_reciever)
+
+    def test_read_empty_email_config(self):
+        with self.assertRaises(configparser.ParsingError) as context:
+            pdfebc.utils.read_email_config(self.temp_config_file.name)
+
+    def test_read_email_config_no_file(self):
+        with tempfile.NamedTemporaryFile() as tmp:
+            config_path = tmp.name
+        with self.assertRaises(IOError) as context:
+            pdfebc.utils.read_email_config(config_path)
+
+    def test_read_email_config_without_reciever(self):
+        self.invalid_config.write(self.temp_config_file)
+        self.temp_config_file.flush()
+        self.temp_config_file.close()
+        with self.assertRaises(configparser.ParsingError) as context:
             pdfebc.utils.read_email_config(self.temp_config_file.name)
 
     def test_attach_valid_files(self):
@@ -124,3 +131,21 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(self.expected_user, actual_user)
         self.assertEqual(self.expected_password, actual_password)
         self.assertEqual(self.expected_reciever, actual_reciever)
+
+    def test_valid_config_exists_no_config(self):
+        with tempfile.NamedTemporaryFile() as file:
+            config_path = file.name
+        self.assertFalse(pdfebc.utils.valid_config_exists(config_path))
+
+    def test_valid_config_exists_with_valid_config(self):
+        self.valid_config.write(self.temp_config_file)
+        self.temp_config_file.close()
+        config_path = self.temp_config_file.name
+        self.assertTrue(pdfebc.utils.valid_config_exists(config_path))
+
+    def test_valid_config_exists_with_config_without_reciever(self):
+        self.invalid_config.write(self.temp_config_file)
+        self.temp_config_file.close()
+        config_path = self.temp_config_file.name
+        self.assertFalse(pdfebc.utils.valid_config_exists(config_path))
+
