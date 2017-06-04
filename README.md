@@ -30,9 +30,6 @@ foray into using stuff like `sphinx`, `Travis-CI` and `ReadTheDocs`, so there's 
 some weirdness here and there.
 
 ### Requirements
-Apart from the Python modules listed in [requirements.txt](requirements.txt), the following 
-requirements need to be satisfied in order for `pdfebc` to function as intended.
-
 * Python 3.6
     - Strictly speaking, 3.5 should also work fine, but the tests use 3.6 features so the
     build is only tested for 3.6.
@@ -53,23 +50,17 @@ requirements need to be satisfied in order for `pdfebc` to function as intended.
     - `pip install --user .`, global installs are not recommended.
     - Or just `pip install .` if you use `virtualenv`.
     - For development, use `pip install -e .` in a `virtualenv`.
-3. For the optional e-mail functionality, you must add a configuration file at 
-`$HOME/.config/pdfebc/config.ini` with the following format:
-    ```bash
-    [EMAIL]
-    user: <sender_email_address>
-    pass: <sender_email_password>
-    reciever: <reciever_email_address>
-    ```
-4. All done! Type `pdfebc -h` on the command line for usage.
+3. All done! Type `pdfebc -h` on the command line for usage.
+4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
+of a configuration file. I strongly recommend that you use an 
+[App password](https://support.google.com/accounts/answer/185833?hl=en) instead of your
+actual account password.
 
 ### License
-This software is licensed under the MIT License, which is about as open source as it gets. 
-See the [LICENSE](LICENSE) file for specifics.
+This software is licensed under the MIT License. See the [LICENSE](LICENSE) file for specifics.
 
 ### TODO
 * Improve code coverage.
 * Add more negative tests.
-* Add step-by-step e-mail configuration creator to the CLI.
 * Add status messages to show progress (for example, which file is currently being 
 compressed and how many are left).
