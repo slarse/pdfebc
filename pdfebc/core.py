@@ -34,7 +34,7 @@ def get_pdf_filenames_at(source_directory):
             for filename in os.listdir(source_directory)
             if filename.endswith(PDF_EXTENSION)]
 
-def compress_pdf(filepath, output_path, ghostscript_binary):
+def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None):
     """Compress a single PDF file.
 
     Args:
@@ -89,6 +89,26 @@ def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binar
         handle_output(out)
         handle_errors(err)
     return out_paths
+
+def send_compressing_status_message(source_path, status_callback):
+    """Send a 'compressing file' status message via the status_callback function.
+
+    Args:
+        source_path (str): Path to the source file to be compressed.
+        status_callback (function): A callback function for passing status messages to a view.
+    """
+    status_message = "Compressing '%s' ..." % source_path
+    status_callback(status_message)
+
+def send_compression_done_status_message(output_path, status_callback):
+    """Send a 'compression done' status message via the status_callback function.
+
+    Args:
+        outpout_path (str): Path to the compress output file.
+        status_callback (function): A callback function for passing status messages to a view.
+    """
+    status_message = "Compression done!\nResult saved to '%s'" % output_path
+    status_callback(status_message)
 
 def handle_output(out):
     """Handle output from call to Ghostscript
