@@ -62,5 +62,3 @@ This software is licensed under the MIT License. See the [LICENSE](LICENSE) file
 ### TODO
 * Improve code coverage.
 * Add more negative tests.
-* Add status messages to show progress (for example, which file is currently being 
-compressed and how many are left).
