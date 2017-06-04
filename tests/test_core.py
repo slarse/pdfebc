@@ -6,7 +6,7 @@ Author: Simon Larsén
 import unittest
 import tempfile
 import os
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from .context import pdfebc
 
 PDF_FILE_EXTENSION = '.pdf'
@@ -34,6 +34,12 @@ class CoreTest(unittest.TestCase):
     def setUpClass(cls):
         cls.trash_can = tempfile.TemporaryDirectory()
         cls.default_trash_file = os.path.join(cls.trash_can.name, 'default')
+        cls.file_size_lower_limit = pdfebc.core.FILE_SIZE_LOWER_LIMIT
+
+    @classmethod
+    def setUp(cls):
+        pdfebc.core.FILE_SIZE_LOWER_LIMIT = cls.file_size_lower_limit
+
 
     def test_get_pdf_filenames_from_empty_dir(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -83,6 +89,34 @@ class CoreTest(unittest.TestCase):
             filename = file.name
         with self.assertRaises(ValueError) as context:
             pdfebc.core.compress_pdf(filename, self.default_trash_file, pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT)
+
+    @patch('pdfebc.core.send_less_than_min_size_status_message')
+    def test_compress_too_small_pdf(self, mock_less_than_min_size_status):
+        with tempfile.TemporaryDirectory(dir=self.trash_can.name) as tmpoutdir:
+            mock_status_callback = Mock(return_value=None)
+            pdf_file = create_temporary_files_with_suffixes(self.trash_can.name, files_per_suffix=1)[0]
+            pdf_file.close()
+            output_path = os.path.join(tmpoutdir, os.path.basename(pdf_file.name))
+            pdfebc.core.compress_pdf(pdf_file.name, output_path,
+                                     pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT, mock_status_callback)
+            mock_less_than_min_size_status.assert_called_once()
+            mock_status_callback.assert_called_once()
+
+    @patch('subprocess.Popen', autospec=True)
+    def test_compress_adequately_sized_pdf(self, mock_popen):
+        # change the lower limit for file size, is reset in the setUp method
+        pdfebc.core.FILE_SIZE_LOWER_LIMIT = 0
+        with tempfile.TemporaryDirectory(dir=self.trash_can.name) as tmpoutdir:
+            mock_status_callback = Mock(return_value=None)
+            pdf_file = create_temporary_files_with_suffixes(self.trash_can.name, files_per_suffix=1)[0]
+            pdf_file.close()
+            output_path = os.path.join(tmpoutdir, os.path.basename(pdf_file.name))
+            pdfebc.core.compress_pdf(pdf_file.name, output_path,
+                                     pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT, mock_status_callback)
+            mock_popen.assert_called_once()
+            mock_popen_instance = mock_popen([])
+            mock_popen_instance.communicate.assert_called_once()
+            mock_status_callback.assert_called()
 
     def test_send_compressing_status_message(self):
         source_path = "/home/simon/Documents/github/pdfebc/superpdf.pdf"
