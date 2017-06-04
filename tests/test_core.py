@@ -91,12 +91,28 @@ class CoreTest(unittest.TestCase):
         pdfebc.core.send_compressing_status_message(source_path, mock_status_callback)
         mock_status_callback.assert_called_once_with(expected_status_message)
 
-    def test_send_compression_done_status_message(self):
+    def test_send_file_done_status_message(self):
         output_path = "/home/simon/Documents/github/pdfebc/pdfebc_out/superpdf.pdf"
-        expected_status_message = "Compression done!\nResult saved to '%s'" % output_path
+        expected_status_message = "File done!\nResult saved to '%s'" % output_path
         mock_status_callback = Mock(return_value=None)
-        pdfebc.core.send_compression_done_status_message(output_path, mock_status_callback)
+        pdfebc.core.send_file_done_status_message(output_path, mock_status_callback)
         mock_status_callback.assert_called_once_with(expected_status_message)
+
+    def test_send_less_than_min_size_status_message(self):
+        source_path = "/home/simon/Documents/github/pdfebc/superpdf.pdf"
+        file_size = 0.5*pdfebc.core.FILE_SIZE_LOWER_LIMIT
+        expected_status_message = """Not compressing '%s'
+Reason: Actual file size is %d bytes,
+lower limit for compression is %d bytes""" % (
+    source_path,
+    file_size,
+    pdfebc.core.FILE_SIZE_LOWER_LIMIT)
+        mock_status_callback = Mock(return_value=None)
+        pdfebc.core.send_less_than_min_size_status_message(source_path,
+                                                           file_size,
+                                                           mock_status_callback)
+        mock_status_callback.assert_called_once_with(expected_status_message)
+
 
     def assert_filepaths_match_file_names(self, filepaths, temporary_files):
         """Assert that a list of filepaths match a list of temporary files.
