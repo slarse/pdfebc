@@ -18,7 +18,7 @@ setup(
     author='Simon Larsén',
     author_email='slarse@kth.se',
     url='https://github.com/slarse/pdfebc',
-    download_url='https://github.com/slarse/pdfebc/archive/v0.1.0.tar.gz',
+    download_url='https://github.com/slarse/pdfebc/archive/v0.1.1.tar.gz',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     scripts=['bin/pdfebc'],
