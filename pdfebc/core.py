@@ -62,7 +62,9 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
                  "-sOutputFile=%s" % output_path, filepath]
                 )
     except FileNotFoundError:
-        print("\nGhostscript not installed or not aliased to %s\n" % ghostscript_binary)
+        if callable(status_callback):
+            status_callback("Ghostscript not installed or not aliased to %s. Exiting ..."
+                            % ghostscript_binary)
         sys.exit(1)
     return process.communicate()
 
@@ -90,6 +92,22 @@ def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binar
         handle_errors(err)
     return out_paths
 
+def send_less_than_min_size_status_message(source_path, file_size, status_callback):
+    """Send a 'file smaller than lower limit' status message via the status_callback function.
+
+    Args:
+        source_path (str): Path to the source file to be compressed.
+        file_size (int): Size of the source file in bytes.
+        status_callback (function): A callback function for passing status messages to a view.
+    """
+    status_message = """Not compressing '%s'
+Reason: Actual file size is %d bytes,
+lower limit for compression is %d bytes""" % (
+        source_path,
+        file_size,
+        FILE_SIZE_LOWER_LIMIT)
+    status_callback(status_message)
+
 def send_compressing_status_message(source_path, status_callback):
     """Send a 'compressing file' status message via the status_callback function.
 
@@ -100,14 +118,14 @@ def send_compressing_status_message(source_path, status_callback):
     status_message = "Compressing '%s' ..." % source_path
     status_callback(status_message)
 
-def send_compression_done_status_message(output_path, status_callback):
-    """Send a 'compression done' status message via the status_callback function.
+def send_file_done_status_message(output_path, status_callback):
+    """Send a 'file done' status message via the status_callback function.
 
     Args:
         outpout_path (str): Path to the compress output file.
         status_callback (function): A callback function for passing status messages to a view.
     """
-    status_message = "Compression done!\nResult saved to '%s'" % output_path
+    status_message = "File done!\nResult saved to '%s'" % output_path
     status_callback(status_message)
 
 def handle_output(out):
