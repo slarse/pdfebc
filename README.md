@@ -2,6 +2,7 @@
 
 **[Docs](http://pdfebc.readthedocs.io/en/latest/)**
 
+[![PyPI version](https://badge.fury.io/py/pdfebc.svg)](https://badge.fury.io/py/pdfebc)
 [![Build Status](https://travis-ci.org/slarse/pdfebc.svg?branch=master)](https://travis-ci.org/slarse/pdfebc)
 [![codecov](https://codecov.io/gh/slarse/pdfebc/branch/master/graph/badge.svg)](https://codecov.io/gh/slarse/pdfebc)
 [![Documentation Status](https://readthedocs.org/projects/pdfebc/badge/?version=latest)](http://pdfebc.readthedocs.io/en/latest/?badge=latest)
