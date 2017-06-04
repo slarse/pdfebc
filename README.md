@@ -45,6 +45,27 @@ some weirdness here and there.
     using a local server that does not have TLS imnpossible.
 
 ### Install
+#### Option 1: Install from PyPi with `pip`
+The latest release of `pdfebc` is on PyPi, and can thus be installed as usual with `pip`.
+I strongly discourage global `pip` installs (i.e. `sudo pip install <package>`), as this
+may land you with incompatible packages in a very short amount of time. A per-user install
+can be done like this:
+
+1. Execute `pip install --user pdfebc` to install the package.
+2. Type `echo "$PATH"` and verify that `$HOME/.local/bin` is on the `PATH`.
+    - If it is not, add it by adding `export PATH="$PATH:$HOME/.local/bin` to your shell configuration
+    file (e.g. `$HOME/.bashrc` for `bash`).
+    - Then execute `source <path_to_config_file>`
+3. Verify the installation by executing `pdfebc -h`. You should se usage information printed to stdout.
+4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
+of a configuration file. I strongly recommend that you use an 
+[App password](https://support.google.com/accounts/answer/185833?hl=en) instead of your
+actual account password.
+
+#### Option 2: Clone the repo and the install with `pip`
+If you want the dev version, you will need to clone the repo, as only release versions are uploaded
+to PyPi. Unless you are planning to contribute something, I suggest going with the release version.
+
 1. Clone the repo with `git`:
     - `git clone https://github.com/slarse/pdfebc`
 2. `cd` into the project root directory and install with `pip`.
