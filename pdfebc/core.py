@@ -41,6 +41,7 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
         filepath (str): Path to the PDF file.
         output_path (str): Output path.
         ghostscript_binary (str): Name/alias of the Ghostscript binary.
+        status_callback (function): A callback function for passing status messages to a view.
 
     Returns:
         (str, str): stdout and stderr from the Ghostrscript process.
@@ -74,28 +75,31 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
         send_file_done_status_message(output_path, status_callback)
     return process.communicate()
 
-def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binary):
+def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binary, status_callback=None):
     """Compress all PDF files in the current directory and place the output in the given output directory.
 
     Args:
         source_directory (str): Filepath to the source directory.
         output_directory (str): Filepath to the output directory.
         ghostscript_binary (str): Name of the Ghostscript binary.
+        status_callback (function): A callback function for passing status messages to a view.
 
     Returns:
         list(str): paths to outputs.
-
-    Raises:
-        ValueError
     """
     source_paths = get_pdf_filenames_at(source_directory)
     out_paths = list()
+    if callable(status_callback):
+        status_callback("Source directory: %s\nOutput directory: %s\nStarting compression of %d PDF files" % (
+            source_directory, output_directory, len(source_paths)))
     for source_path in source_paths:
         output = os.path.join(output_directory, os.path.basename(source_path))
         out_paths.append(output)
-        out, err = compress_pdf(source_path, output, ghostscript_binary)
+        out, err = compress_pdf(source_path, output, ghostscript_binary, status_callback)
         handle_output(out)
         handle_errors(err)
+    if callable(status_callback):
+        status_callback("All files processed!")
     return out_paths
 
 def send_less_than_min_size_status_message(source_path, file_size, status_callback):
