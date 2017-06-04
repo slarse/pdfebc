@@ -68,3 +68,12 @@ def prompt_for_config_values():
         sys.exit(1)
     print("Everything looks spiffy, thank you!")
     return user, password, reciever
+
+def status_callback(status):
+    """Callback function for recieving status messages. This one simply prints the message to
+    stdout.
+
+    Args:
+        status (str): A status message.
+    """
+    print(status)
