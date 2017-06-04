@@ -54,7 +54,7 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
         file_size = os.stat(filepath).st_size
         if file_size < FILE_SIZE_LOWER_LIMIT:
             if callable(status_callback):
-                send_less_than_min_size_status_message(filepath, output_path, file_size)
+                send_less_than_min_size_status_message(filepath, file_size, status_callback)
             process = subprocess.Popen(['cp', filepath, output_path])
         else:
             if callable(status_callback):
