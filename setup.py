@@ -12,7 +12,7 @@ required = ['appdirs']
 
 setup(
     name='pdfebc',
-    version='0.1.0',
+    version='0.1.1',
     description='Application to compress PDF documents into an ebook reader-friendly size.',
     long_description=readme,
     author='Simon Larsén',
