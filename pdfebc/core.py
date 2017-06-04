@@ -53,8 +53,12 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
     try:
         file_size = os.stat(filepath).st_size
         if file_size < FILE_SIZE_LOWER_LIMIT:
+            if callable(status_callback):
+                send_less_than_min_size_status_message(filepath, output_path, file_size)
             process = subprocess.Popen(['cp', filepath, output_path])
         else:
+            if callable(status_callback):
+                send_compressing_status_message(filepath, status_callback)
             process = subprocess.Popen(
                 [ghostscript_binary, "-sDEVICE=pdfwrite",
                  "-dCompatabilityLevel=1.4", "-dPDFSETTINGS=/ebook",
@@ -66,6 +70,8 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
             status_callback("Ghostscript not installed or not aliased to %s. Exiting ..."
                             % ghostscript_binary)
         sys.exit(1)
+    if callable(status_callback):
+        send_file_done_status_message(output_path, status_callback)
     return process.communicate()
 
 def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binary):
