@@ -135,7 +135,7 @@ def send_file_done_status_message(output_path, status_callback):
         outpout_path (str): Path to the compress output file.
         status_callback (function): A callback function for passing status messages to a view.
     """
-    status_message = "File done!\nResult saved to '%s'" % output_path
+    status_message = "File done! Result saved to '%s'" % output_path
     status_callback(status_message)
 
 def handle_output(out):

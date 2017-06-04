@@ -127,7 +127,7 @@ class CoreTest(unittest.TestCase):
 
     def test_send_file_done_status_message(self):
         output_path = "/home/simon/Documents/github/pdfebc/pdfebc_out/superpdf.pdf"
-        expected_status_message = "File done!\nResult saved to '%s'" % output_path
+        expected_status_message = "File done! Result saved to '%s'" % output_path
         mock_status_callback = Mock(return_value=None)
         pdfebc.core.send_file_done_status_message(output_path, mock_status_callback)
         mock_status_callback.assert_called_once_with(expected_status_message)
