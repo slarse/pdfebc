@@ -6,6 +6,7 @@ Author: Simon Larsén
 import unittest
 import tempfile
 import os
+from unittest.mock import Mock
 from .context import pdfebc
 
 PDF_FILE_EXTENSION = '.pdf'
@@ -83,6 +84,20 @@ class CoreTest(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             pdfebc.core.compress_pdf(filename, self.default_trash_file, pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT)
 
+    def test_send_compressing_status_message(self):
+        source_path = "/home/simon/Documents/github/pdfebc/superpdf.pdf"
+        expected_status_message = "Compressing '%s' ..." % source_path
+        mock_status_callback = Mock(return_value=None)
+        pdfebc.core.send_compressing_status_message(source_path, mock_status_callback)
+        mock_status_callback.assert_called_once_with(expected_status_message)
+
+    def test_send_compression_done_status_message(self):
+        output_path = "/home/simon/Documents/github/pdfebc/pdfebc_out/superpdf.pdf"
+        expected_status_message = "Compression done!\nResult saved to '%s'" % output_path
+        mock_status_callback = Mock(return_value=None)
+        pdfebc.core.send_compression_done_status_message(output_path, mock_status_callback)
+        mock_status_callback.assert_called_once_with(expected_status_message)
+
     def assert_filepaths_match_file_names(self, filepaths, temporary_files):
         """Assert that a list of filepaths match a list of temporary files.
 
@@ -95,3 +110,4 @@ class CoreTest(unittest.TestCase):
         sorted_temporary_files = sorted(temporary_files, key=lambda tmpfile: tmpfile.name)
         for filepath, tmpfile in zip(sorted_filepaths, sorted_temporary_files):
             self.assertEqual(filepath, tmpfile.name)
+
