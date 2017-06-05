@@ -46,16 +46,16 @@ Requirements
 ============
 * Python 3.6
     - Strictly speaking, 3.5 should also work fine, but the tests use 3.6 features so the
-    build is only tested for 3.6.
+      build is only tested for 3.6.
 * ``Ghostscript``
     - ``pdfebc`` requires ``Ghostscript`` for the PDF compression. The default binary is ``gs``,
-    but this can be specified via the CLI.
+      but this can be specified via the CLI.
 * A Gmail account (for sending e-mails)
     - By default, ``pdfebc`` uses Google's SMTP server to send e-mails. If you don't intend
-    to use the send functionality, then you may disregard this requirement.
+      to use the send functionality, then you may disregard this requirement.
     - It is possible to use a different SMTP server by changing the ``SMTP_SERVER`` variable in the
-    ``pdfebc.utils`` module. Note that TLS is enabled and will likely cause sending e-mails
-    using a local server that does not have TLS impossible.
+      ``pdfebc.utils`` module. Note that TLS is enabled and will likely cause sending e-mails
+      using a local server that does not have TLS impossible.
 
 Install
 =======
@@ -69,7 +69,7 @@ can be done like this:
 1. Execute ``pip install --user pdfebc`` to install the package.
 2. Type ``echo "$PATH"`` and verify that ``$HOME/.local/bin`` is on the ``PATH``.
     - If it is not, add it by adding ``export PATH="$PATH:$HOME/.local/bin`` to your shell configuration
-    file (e.g. ``$HOME/.bashrc`` for ``bash``).
+      file (e.g. ``$HOME/.bashrc`` for ``bash``).
     - Then execute ``source <path_to_config_file>``
 3. Verify the installation by executing ``pdfebc -h``. You should se usage information printed to stdout.
 4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
