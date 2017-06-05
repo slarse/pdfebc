@@ -4,7 +4,7 @@
 Author: Simon Larsén
 """
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, create_autospec, Mock
 import tempfile
 import configparser
 import os
@@ -148,4 +148,47 @@ class UtilsTest(unittest.TestCase):
         self.temp_config_file.close()
         config_path = self.temp_config_file.name
         self.assertFalse(pdfebc.utils.valid_config_exists(config_path))
+
+    def test_if_callable_call_with_formatted_string_too_few_args(self):
+        three_args_formattable_string = "test {} test {} test {}"
+        mock_callback = Mock(return_value=None)
+        args = ("test", "test")
+        with self.assertRaises(ValueError) as context:
+            pdfebc.utils.if_callable_call_with_formatted_string(
+                mock_callback,
+                three_args_formattable_string,
+                *args)
+
+    def test_if_callable_call_with_formatted_string_valid_args(self):
+        three_args_formattable_string = "test {} test {} test {}"
+        args = ("test", "test", "test")
+        mock_callback = Mock(return_vale=None)
+        pdfebc.utils.if_callable_call_with_formatted_string(
+                mock_callback,
+                three_args_formattable_string,
+                *args)
+        mock_callback.assert_called_once_with(
+            three_args_formattable_string.format(*args))
+
+    @patch('pdfebc.utils.callable', return_value=False)
+    def test_if_callable_call_with_formatted_string_not_callable_too_few_args(self, mock_callable):
+        three_args_formattable_string = "test {} test {} test {}"
+        args = ("test", "test")
+        mock_callback = Mock(return_value=None)
+        with self.assertRaises(ValueError) as context:
+            pdfebc.utils.if_callable_call_with_formatted_string(
+                mock_callback,
+                three_args_formattable_string,
+                *args)
+
+    @patch('pdfebc.utils.callable', return_value=False)
+    def test_if_callable_call_with_formatted_string_not_callable_valid_args(self, mock_callable):
+        three_args_formattable_string = "test {} test {} test {}"
+        args = ("test", "test", "test")
+        mock_callback = Mock(return_value=None)
+        pdfebc.utils.if_callable_call_with_formatted_string(
+            mock_callback,
+            three_args_formattable_string,
+            *args)
+        self.assertFalse(mock_callback.called)
 
