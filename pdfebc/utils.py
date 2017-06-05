@@ -186,3 +186,24 @@ def valid_config_exists(config_path=CONFIG_PATH):
     else:
         return False
     return True
+
+def if_callable_call_with_formatted_string(callback, formattable_string, *args):
+    """If the callback is callable, format the string with the args and make a call.
+    Otherwise, do nothing.
+
+    Args:
+        callback (function): May or may not be callable.
+        formattable_string (str): A string with '{}'s inserted.
+        *args: A variable amount of arguments for the string formatting. Must correspond to the
+        amount of '{}'s in 'formattable_string'.
+    Raises:
+        ValueError
+    """
+    try:
+        formatted_string = formattable_string.format(*args)
+    except IndexError:
+        raise ValueError("Mismatch metween amount of insertion points in the formattable string\n"
+                         "and the amount of args given.")
+    if callable(callback):
+        print("HEJ")
+        callback(formatted_string)
