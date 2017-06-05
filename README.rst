@@ -94,7 +94,7 @@ account password.
 
 License
 =======
-This software is licensed under the MIT License. See the [LICENSE](LICENSE) file for specifics.
+This software is licensed under the MIT License. See the `LICENSE`_ file for specifics.
 
 TODO
 ====
@@ -103,3 +103,4 @@ TODO
 
 .. _Docs: http://pdfebc.readthedocs.io/en/latest/
 .. _App password: https://support.google.com/accounts/answer/185833?hl=en
+.. _LICENSE: LICENSE
