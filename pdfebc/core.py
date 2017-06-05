@@ -16,6 +16,13 @@ BYTES_PER_MEGABYTE = 1024**2
 FILE_SIZE_LOWER_LIMIT = BYTES_PER_MEGABYTE
 PDF_EXTENSION = ".pdf"
 
+COMPRESSING_STATUS_MESSAGE = "Compressing '{}' ..."
+FILE_DONE_STATUS_MESSAGE = "File done! Result saved to '{}'"
+NOT_COMPRESSING_STATUS_MESSAGE = """Not compressing '{}'
+Reason: Actual file size is {} bytes,
+lower limit for compression is {} bytes"""
+
+
 def get_pdf_filenames_at(source_directory):
     """Find all PDF files in the specified directory.
 
@@ -55,11 +62,12 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
         file_size = os.stat(filepath).st_size
         if file_size < FILE_SIZE_LOWER_LIMIT:
             if callable(status_callback):
-                send_less_than_min_size_status_message(filepath, file_size, status_callback)
+                status_callback(NOT_COMPRESSING_STATUS_MESSAGE.format(filepath, file_size,
+                                                                      FILE_SIZE_LOWER_LIMIT))
             process = subprocess.Popen(['cp', filepath, output_path])
         else:
             if callable(status_callback):
-                send_compressing_status_message(filepath, status_callback)
+                status_callback(COMPRESSING_STATUS_MESSAGE.format(filepath))
             process = subprocess.Popen(
                 [ghostscript_binary, "-sDEVICE=pdfwrite",
                  "-dCompatabilityLevel=1.4", "-dPDFSETTINGS=/ebook",
@@ -72,7 +80,7 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
                             % ghostscript_binary)
         sys.exit(1)
     if callable(status_callback):
-        send_file_done_status_message(output_path, status_callback)
+        status_callback(FILE_DONE_STATUS_MESSAGE.format(output_path))
     return process.communicate()
 
 def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binary, status_callback=None):
@@ -101,42 +109,6 @@ def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binar
     if callable(status_callback):
         status_callback("All files processed!")
     return out_paths
-
-def send_less_than_min_size_status_message(source_path, file_size, status_callback):
-    """Send a 'file smaller than lower limit' status message via the status_callback function.
-
-    Args:
-        source_path (str): Path to the source file to be compressed.
-        file_size (int): Size of the source file in bytes.
-        status_callback (function): A callback function for passing status messages to a view.
-    """
-    status_message = """Not compressing '%s'
-Reason: Actual file size is %d bytes,
-lower limit for compression is %d bytes""" % (
-        source_path,
-        file_size,
-        FILE_SIZE_LOWER_LIMIT)
-    status_callback(status_message)
-
-def send_compressing_status_message(source_path, status_callback):
-    """Send a 'compressing file' status message via the status_callback function.
-
-    Args:
-        source_path (str): Path to the source file to be compressed.
-        status_callback (function): A callback function for passing status messages to a view.
-    """
-    status_message = "Compressing '%s' ..." % source_path
-    status_callback(status_message)
-
-def send_file_done_status_message(output_path, status_callback):
-    """Send a 'file done' status message via the status_callback function.
-
-    Args:
-        outpout_path (str): Path to the compress output file.
-        status_callback (function): A callback function for passing status messages to a view.
-    """
-    status_message = "File done! Result saved to '%s'" % output_path
-    status_callback(status_message)
 
 def handle_output(out):
     """Handle output from call to Ghostscript
