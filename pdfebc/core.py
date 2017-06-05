@@ -50,9 +50,6 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
         ghostscript_binary (str): Name/alias of the Ghostscript binary.
         status_callback (function): A callback function for passing status messages to a view.
 
-    Returns:
-        (str, str): stdout and stderr from the Ghostrscript process.
-
     Raises:
         ValueError
     """
@@ -79,9 +76,9 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
             status_callback("Ghostscript not installed or not aliased to %s. Exiting ..."
                             % ghostscript_binary)
         sys.exit(1)
+    process.communicate()
     if callable(status_callback):
         status_callback(FILE_DONE_STATUS_MESSAGE.format(output_path))
-    return process.communicate()
 
 def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binary, status_callback=None):
     """Compress all PDF files in the current directory and place the output in the given output directory.
@@ -103,31 +100,7 @@ def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binar
     for source_path in source_paths:
         output = os.path.join(output_directory, os.path.basename(source_path))
         out_paths.append(output)
-        out, err = compress_pdf(source_path, output, ghostscript_binary, status_callback)
-        handle_output(out)
-        handle_errors(err)
+        compress_pdf(source_path, output, ghostscript_binary, status_callback)
     if callable(status_callback):
         status_callback("All files processed!")
     return out_paths
-
-def handle_output(out):
-    """Handle output from call to Ghostscript
-
-    .. warning:: Not implemented!
-
-    Args:
-        out (str): stdout from Ghostscript.
-    """
-    #TODO Implement
-    return
-
-def handle_errors(err):
-    """Handle output from call to Ghostscript
-
-    .. warning:: Not implemented!
-
-    Args:
-        err (str): stderr from Ghostscript.
-    """
-    #TODO Implement
-    return
