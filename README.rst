@@ -1,14 +1,23 @@
-# pdfebc - PDF ebook compressor
+pdfebc - PDF ebook compressor
+*****************************
 
-**[Docs](http://pdfebc.readthedocs.io/en/latest/)**
+.. _Docs: http://pdfebc.readthedocs.io/en/latest/
 
-[![PyPI version](https://badge.fury.io/py/pdfebc.svg)](https://badge.fury.io/py/pdfebc)
-[![Build Status](https://travis-ci.org/slarse/pdfebc.svg?branch=master)](https://travis-ci.org/slarse/pdfebc)
-[![codecov](https://codecov.io/gh/slarse/pdfebc/branch/master/graph/badge.svg)](https://codecov.io/gh/slarse/pdfebc)
-[![Documentation Status](https://readthedocs.org/projects/pdfebc/badge/?version=latest)](http://pdfebc.readthedocs.io/en/latest/?badge=latest)
+.. image:: https://badge.fury.io/py/pdfebc.svg
+    :target: https://badge.fury.io/py/pdfebc
+    :alt: PyPi Version
+.. image:: https://travis-ci.org/slarse/pdfebc.svg?branch=master
+    :target: https://travis-ci.org/slarse/pdfebc
+    :alt: Build Status
+.. image:: https://codecov.io/gh/slarse/pdfebc/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/slarse/pdfebc
+    :alt: Code Coverage
+.. image:: https://readthedocs.org/projects/pdfebc/badge/?version=latest
+    :target: http://pdfebc.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
-
-## Overview
+Overview
+========
 `pdfebc` is a CLI tool that uses `Ghostscript` to compress PDF documents to a size that befits 
 an ebook reader, such as a Kindle. The CLI works by targeting a source and output directory (if 
 not specified by the user, defults to use `.` for source and `pdfebc_out` for output), then 
@@ -23,14 +32,16 @@ is fairly slow, so expect large files to take a while to compress.
 As an example use case, I mainly use `pdfebc` as an easy way to compress lecture slides and 
 similar study materials, send them to my Kindle and then clean up the output.
 
-### Purpose of the project
+Purpose of the project
+======================
 The core functionality of `pdfebc` was already done when I started this little project. As 
 such, the main purpose here isn't to provide the functionality, but to do so in a robust way, 
 with proper documentation, testing and continuous integration. It is, essentially, my first 
 foray into using stuff like `sphinx`, `Travis-CI` and `ReadTheDocs`, so there's bound to be 
 some weirdness here and there.
 
-### Requirements
+Requirements
+------------
 * Python 3.6
     - Strictly speaking, 3.5 should also work fine, but the tests use 3.6 features so the
     build is only tested for 3.6.
@@ -44,8 +55,10 @@ some weirdness here and there.
     `pdfebc.utils` module. Note that TLS is enabled and will likely cause sending e-mails
     using a local server that does not have TLS imnpossible.
 
-### Install
-#### Option 1: Install from PyPi with `pip`
+Install
+-------
+Option 1: Install from PyPi with `pip`
+++++++++++++++++++++++++++++++++++++++
 The latest release of `pdfebc` is on PyPi, and can thus be installed as usual with `pip`.
 I strongly discourage global `pip` installs (i.e. `sudo pip install <package>`), as this
 may land you with incompatible packages in a very short amount of time. A per-user install
@@ -62,7 +75,8 @@ of a configuration file. I strongly recommend that you use an
 [App password](https://support.google.com/accounts/answer/185833?hl=en) instead of your
 actual account password.
 
-#### Option 2: Clone the repo and the install with `pip`
+Option 2: Clone the repo and the install with `pip`
++++++++++++++++++++++++++++++++++++++++++++++++++++
 If you want the dev version, you will need to clone the repo, as only release versions are uploaded
 to PyPi. Unless you are planning to contribute something, I suggest going with the release version.
 
@@ -75,12 +89,14 @@ to PyPi. Unless you are planning to contribute something, I suggest going with t
 3. All done! Type `pdfebc -h` on the command line for usage.
 4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
 of a configuration file. I strongly recommend that you use an 
-[App password](https://support.google.com/accounts/answer/185833?hl=en) instead of your
+`App password <https://support.google.com/accounts/answer/185833?hl=en`_ instead of your
 actual account password.
 
-### License
+License
+-------
 This software is licensed under the MIT License. See the [LICENSE](LICENSE) file for specifics.
 
-### TODO
+TODO
+----
 * Improve code coverage.
 * Add more negative tests.
