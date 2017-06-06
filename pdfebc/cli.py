@@ -76,4 +76,4 @@ def status_callback(status):
     Args:
         status (str): A status message.
     """
-    print(status)
+    print(status + "\n")
