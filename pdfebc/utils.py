@@ -11,7 +11,7 @@ The config file should have the following format:
     |[EMAIL]
     |user = sender_email
     |pass = password
-    |reciever = reciever_email
+    |receiver = receiver_email
 
 All characters after the colon and whitespace (as much whitespace as you'd like) until
 EOL counts as the username/password.
@@ -34,16 +34,16 @@ CONFIG_PATH = os.path.join(appdirs.user_config_dir('pdfebc'), 'email.cnf')
 SECTION_KEY = "email"
 PASSWORD_KEY = "pass"
 USER_KEY = "user"
-RECIEVER_KEY = "reciever"
+RECIEVER_KEY = "receiver"
 SMTP_SERVER = "smtp.gmail.com"
 
-def create_email_config(user, password, reciever):
+def create_email_config(user, password, receiver):
     """Create an email config.
 
     Args:
         user (str): User e-mail address.
         password (str): Password to user e-mail address.
-        reciever: Reciever e-mail address.
+        receiver: Reciever e-mail address.
 
     Returns:
         configparser.ConfigParser: A ConfigParser
@@ -52,7 +52,7 @@ def create_email_config(user, password, reciever):
     config[SECTION_KEY] = {
         USER_KEY: user,
         PASSWORD_KEY: password,
-        RECIEVER_KEY: reciever}
+        RECIEVER_KEY: receiver}
     return config
 
 def write_config(config, config_path=CONFIG_PATH):
@@ -74,7 +74,7 @@ def read_email_config(config_path=CONFIG_PATH):
         config_path (str): Relative path to the email config file.
 
     Returns:
-        (str, str, str): User email, user password and reciever email.
+        (str, str, str): User email, user password and receiver email.
 
     Raises:
         IOError
@@ -85,8 +85,8 @@ def read_email_config(config_path=CONFIG_PATH):
     config.read(config_path)
     user = try_get_conf(config, SECTION_KEY, USER_KEY)
     password = try_get_conf(config, SECTION_KEY, PASSWORD_KEY)
-    reciever = try_get_conf(config, SECTION_KEY, RECIEVER_KEY)
-    return user, password, reciever
+    receiver = try_get_conf(config, SECTION_KEY, RECIEVER_KEY)
+    return user, password, receiver
 
 def try_get_conf(config, section, attribute):
     """Try to parse an attribute of the config file.
@@ -108,13 +108,13 @@ def try_get_conf(config, section, attribute):
         raise configparser.ParsingError("""Config file badly formed!\n
                 Failed to get attribute '%s' from section '%s'!""" % (attribute, section))
 
-def send_with_attachments(user, password, reciever, subject, message, filepaths):
-    """Send an email from the user (a gmail) to the reciever.
+def send_with_attachments(user, password, receiver, subject, message, filepaths):
+    """Send an email from the user (a gmail) to the receiver.
 
     Args:
         user (str): The sender's email address.
         password (str): The password to the 'user' address.
-        reciever (str): The reciever's email address.
+        receiver (str): The receiver's email address.
         subject (str): Subject of the email.
         message (str): A message.
         filepaths (list(str)): Filepaths to files to be attached.
@@ -123,7 +123,7 @@ def send_with_attachments(user, password, reciever, subject, message, filepaths)
     email_.attach(MIMEText(message))
     email_["Subject"] = subject
     email_["From"] = user
-    email_["To"] = reciever
+    email_["To"] = receiver
     attach_files(filepaths, email_)
     send_email(user, password, email_)
 
@@ -162,12 +162,10 @@ def send_files_preconf(filepaths):
     Args:
         filepaths (list(str)): A list of filepaths.
     """
-    user, password, reciever = read_email_config(CONFIG_PATH)
+    user, password, receiver = read_email_config(CONFIG_PATH)
     subject = "PDF files from pdfebc"
     message = ""
-    send_with_attachments(
-        user, password, reciever, subject, message, filepaths
-        )
+    send_with_attachments(user, password, receiver, subject, message, filepaths)
 
 def valid_config_exists(config_path=CONFIG_PATH):
     """Verify that a valid config file exists.
