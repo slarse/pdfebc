@@ -20,7 +20,7 @@ def main():
             user, password, receiver = cli.prompt_for_config_values()
             config = utils.create_email_config(user, password, receiver)
             utils.write_config(config)
-        utils.send_files_preconf(filepaths)
+        utils.send_files_preconf(filepaths, status_callback=cli.status_callback)
     if args.clean:
         shutil.rmtree(args.outdir)
 
