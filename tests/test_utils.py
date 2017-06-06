@@ -19,7 +19,7 @@ class UtilsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.expected_user = "test_user"
         cls.expected_password = "test_password"
-        cls.expected_reciever = "test_reciever"
+        cls.expected_receiver = "test_receiver"
 
     @classmethod
     def setUp(cls):
@@ -32,7 +32,7 @@ class UtilsTest(unittest.TestCase):
             file.close()
         cls.valid_config = pdfebc.utils.create_email_config(cls.expected_user,
                                                             cls.expected_password,
-                                                            cls.expected_reciever)
+                                                            cls.expected_receiver)
         cls.invalid_config = configparser.ConfigParser()
         cls.invalid_config[pdfebc.utils.SECTION_KEY] = {pdfebc.utils.USER_KEY: cls.expected_user,
                                                         pdfebc.utils.PASSWORD_KEY: cls.expected_password}
@@ -53,16 +53,16 @@ class UtilsTest(unittest.TestCase):
         section = config[pdfebc.utils.SECTION_KEY]
         self.assertEqual(self.expected_user, section[pdfebc.utils.USER_KEY])
         self.assertEqual(self.expected_password, section[pdfebc.utils.PASSWORD_KEY])
-        self.assertEqual(self.expected_reciever, section[pdfebc.utils.RECIEVER_KEY])
+        self.assertEqual(self.expected_receiver, section[pdfebc.utils.RECIEVER_KEY])
 
     def test_read_valid_email_config(self):
         self.valid_config.write(self.temp_config_file)
         self.temp_config_file.flush()
         self.temp_config_file.close()
-        actual_user, actual_password, actual_reciever = pdfebc.utils.read_email_config(self.temp_config_file.name)
+        actual_user, actual_password, actual_receiver = pdfebc.utils.read_email_config(self.temp_config_file.name)
         self.assertEqual(self.expected_user, actual_user)
         self.assertEqual(self.expected_password, actual_password)
-        self.assertEqual(self.expected_reciever, actual_reciever)
+        self.assertEqual(self.expected_receiver, actual_receiver)
 
     def test_read_empty_email_config(self):
         with self.assertRaises(configparser.ParsingError) as context:
@@ -74,7 +74,7 @@ class UtilsTest(unittest.TestCase):
         with self.assertRaises(IOError) as context:
             pdfebc.utils.read_email_config(config_path)
 
-    def test_read_email_config_without_reciever(self):
+    def test_read_email_config_without_receiver(self):
         self.invalid_config.write(self.temp_config_file)
         self.temp_config_file.flush()
         self.temp_config_file.close()
@@ -96,11 +96,11 @@ class UtilsTest(unittest.TestCase):
     @patch('smtplib.SMTP')
     def test_send_valid_email(self, mock_smtp):
         mock_smtp_instance = mock_smtp()
-        user, password, reciever = "test_user", "test_password", "test_reciever"
+        user, password, receiver = "test_user", "test_password", "test_receiver"
         subject = "Test e-mail"
         email_ = MIMEMultipart()
         email_['From'] = user
-        email_['To'] = reciever
+        email_['To'] = receiver
         email_['Subject'] = subject
         pdfebc.utils.send_email(user, password, email_)
         mock_smtp_instance.starttls.assert_called_once()
@@ -111,10 +111,10 @@ class UtilsTest(unittest.TestCase):
     @patch('smtplib.SMTP')
     def test_send_valid_email_preconf(self, mock_smtp):
         mock_smtp_instance = mock_smtp()
-        user, password, reciever = "test_user", "test_password", "test_reciever"
+        user, password, receiver = "test_user", "test_password", "test_receiver"
         subject = "Test e-mail"
         message = "Test e-mail body"
-        pdfebc.utils.send_with_attachments(user, password, reciever, subject, message, self.attachment_filenames)
+        pdfebc.utils.send_with_attachments(user, password, receiver, subject, message, self.attachment_filenames)
         mock_smtp_instance.starttls.assert_called_once()
         mock_smtp_instance.login.assert_called_once_with(user, password)
         mock_smtp_instance.send_message.assert_called_once()
@@ -124,13 +124,13 @@ class UtilsTest(unittest.TestCase):
         section_key = pdfebc.utils.SECTION_KEY
         user_key = pdfebc.utils.USER_KEY
         password_key = pdfebc.utils.PASSWORD_KEY
-        reciever_key = pdfebc.utils.RECIEVER_KEY
+        receiver_key = pdfebc.utils.RECIEVER_KEY
         actual_user = self.valid_config[section_key][user_key]
         actual_password = self.valid_config[section_key][password_key]
-        actual_reciever = self.valid_config[section_key][reciever_key]
+        actual_receiver = self.valid_config[section_key][receiver_key]
         self.assertEqual(self.expected_user, actual_user)
         self.assertEqual(self.expected_password, actual_password)
-        self.assertEqual(self.expected_reciever, actual_reciever)
+        self.assertEqual(self.expected_receiver, actual_receiver)
 
     def test_valid_config_exists_no_config(self):
         with tempfile.NamedTemporaryFile() as file:
@@ -143,7 +143,7 @@ class UtilsTest(unittest.TestCase):
         config_path = self.temp_config_file.name
         self.assertTrue(pdfebc.utils.valid_config_exists(config_path))
 
-    def test_valid_config_exists_with_config_without_reciever(self):
+    def test_valid_config_exists_with_config_without_receiver(self):
         self.invalid_config.write(self.temp_config_file)
         self.temp_config_file.close()
         config_path = self.temp_config_file.name

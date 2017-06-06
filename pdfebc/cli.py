@@ -50,10 +50,10 @@ def create_argparser():
     return parser
 
 def prompt_for_config_values():
-    """Prompt the user for the user, password and reciever values for the config.
+    """Prompt the user for the user, password and receiver values for the config.
 
     Returns:
-        str, str, str: user e-mail, user password and reciever e-mail (or whatever the user enters
+        str, str, str: user e-mail, user password and receiver e-mail (or whatever the user enters
         when prompted for these).
     """
     print("""The 'send' functionality requires an e-mail configuration file, and I can't find one!
@@ -61,13 +61,13 @@ def prompt_for_config_values():
     information must be filled in, nothing can be left empty!\n""")
     user = input("Please enter the sender's e-mail address: ")
     password = input("Please enter the password for the sender's e-mail address: ")
-    reciever = input("Please enter the reciever's email address: ")
-    if not user or not password or not reciever:
+    receiver = input("Please enter the receiver's email address: ")
+    if not user or not password or not receiver:
         print("""One or more fields were left empty! I'm gonna crash now, re-run the program and
         try again. And be more careful this time.""")
         sys.exit(1)
     print("Everything looks spiffy, thank you!")
-    return user, password, reciever
+    return user, password, receiver
 
 def status_callback(status):
     """Callback function for recieving status messages. This one simply prints the message to

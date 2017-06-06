@@ -17,8 +17,8 @@ def main():
                                             args.ghostscript, cli.status_callback)
     if args.send:
         if not utils.valid_config_exists():
-            user, password, reciever = cli.prompt_for_config_values()
-            config = utils.create_email_config(user, password, reciever)
+            user, password, receiver = cli.prompt_for_config_values()
+            config = utils.create_email_config(user, password, receiver)
             utils.write_config(config)
         utils.send_files_preconf(filepaths)
     if args.clean:
