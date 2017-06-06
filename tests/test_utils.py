@@ -88,7 +88,6 @@ class UtilsTest(unittest.TestCase):
         part_dispositions = [part.get('Content-Disposition')
                              for part in email.message_from_bytes(email_.as_bytes()).walk()
                              if part.get_content_maintype() == 'application']
-        print(part_dispositions)
         for filename_base in map(os.path.basename, self.attachment_filenames):
             self.assertTrue(
                 any(map(lambda disp: filename_base in disp, part_dispositions)))
@@ -109,14 +108,15 @@ class UtilsTest(unittest.TestCase):
         mock_smtp_instance.quit.assert_called_once()
 
     @patch('smtplib.SMTP')
-    def test_send_valid_email_preconf(self, mock_smtp):
+    def test_send_valid_email_with_attachments(self, mock_smtp):
         mock_smtp_instance = mock_smtp()
-        user, password, receiver = "test_user", "test_password", "test_receiver"
         subject = "Test e-mail"
         message = "Test e-mail body"
-        pdfebc.utils.send_with_attachments(user, password, receiver, subject, message, self.attachment_filenames)
+        pdfebc.utils.send_with_attachments(self.expected_user, self.expected_password,
+                                           self.expected_receiver, subject, message,
+                                           self.attachment_filenames)
         mock_smtp_instance.starttls.assert_called_once()
-        mock_smtp_instance.login.assert_called_once_with(user, password)
+        mock_smtp_instance.login.assert_called_once_with(self.expected_user, self.expected_password)
         mock_smtp_instance.send_message.assert_called_once()
         mock_smtp_instance.quit.assert_called_once()
 
@@ -192,3 +192,21 @@ class UtilsTest(unittest.TestCase):
             *args)
         self.assertFalse(mock_callback.called)
 
+    @patch('smtplib.SMTP')
+    def test_send_files_preconf_valid_files(self, mock_smtp):
+        mock_smtp_instance = mock_smtp()
+        mock_status_callback = Mock(return_value=None)
+        self.valid_config.write(self.temp_config_file)
+        self.temp_config_file.close()
+        pdfebc.utils.send_files_preconf(self.attachment_filenames, config_path=self.temp_config_file.name,
+                                        status_callback=mock_status_callback)
+        mock_smtp_instance.starttls.assert_called_once()
+        mock_smtp_instance.login.assert_called_once_with(self.expected_user, self.expected_password)
+        mock_smtp_instance.send_message.assert_called_once()
+        mock_smtp_instance.quit.assert_called_once()
+        expected_send_message = pdfebc.utils.SENDING_PRECONF.format(
+            self.expected_user, self.expected_receiver,
+            pdfebc.utils.SMTP_SERVER, '\n'.join(self.attachment_filenames))
+        expected_sent_message = pdfebc.utils.FILES_SENT
+        mock_status_callback.assert_any_call(expected_send_message)
+        mock_status_callback.assert_any_call(expected_sent_message)

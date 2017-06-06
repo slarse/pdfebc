@@ -37,6 +37,14 @@ USER_KEY = "user"
 RECIEVER_KEY = "receiver"
 SMTP_SERVER = "smtp.gmail.com"
 
+SENDING_PRECONF = """Sending files ...
+From: {}
+To: {}
+SMTP Server: {}
+Files:
+{}"""
+FILES_SENT = "Files successfully sent!"""
+
 def create_email_config(user, password, receiver):
     """Create an email config.
 
@@ -156,16 +164,19 @@ def send_email(user, password, email_):
     server.send_message(email_)
     server.quit()
 
-def send_files_preconf(filepaths):
+def send_files_preconf(filepaths, config_path=CONFIG_PATH, status_callback=None):
     """Send files using the config.ini settings.
 
     Args:
         filepaths (list(str)): A list of filepaths.
     """
-    user, password, receiver = read_email_config(CONFIG_PATH)
+    user, password, receiver = read_email_config(config_path)
     subject = "PDF files from pdfebc"
     message = ""
+    args = (user, receiver, SMTP_SERVER, '\n'.join(filepaths))
+    if_callable_call_with_formatted_string(status_callback, SENDING_PRECONF, *args)
     send_with_attachments(user, password, receiver, subject, message, filepaths)
+    if_callable_call_with_formatted_string(status_callback, FILES_SENT)
 
 def valid_config_exists(config_path=CONFIG_PATH):
     """Verify that a valid config file exists.
@@ -203,5 +214,4 @@ def if_callable_call_with_formatted_string(callback, formattable_string, *args):
         raise ValueError("Mismatch metween amount of insertion points in the formattable string\n"
                          "and the amount of args given.")
     if callable(callback):
-        print("HEJ")
         callback(formatted_string)
