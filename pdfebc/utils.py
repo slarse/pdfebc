@@ -8,7 +8,7 @@ Requires a config file called 'email.cnf' in the user conf directory specified b
 case of Arch Linux, this is '$HOME/.config/pdfebc/email.cnf', but this may vary with distributions.
 The config file should have the following format:
 
-    |[EMAIL]
+    |[email]
     |user = sender_email
     |pass = password
     |receiver = receiver_email
