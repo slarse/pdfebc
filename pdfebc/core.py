@@ -11,17 +11,24 @@ of functions that manipulate PDF files and the file system.
 import os
 import sys
 import subprocess
+from . import utils
 
 BYTES_PER_MEGABYTE = 1024**2
 FILE_SIZE_LOWER_LIMIT = BYTES_PER_MEGABYTE
 PDF_EXTENSION = ".pdf"
 
-COMPRESSING_STATUS_MESSAGE = "Compressing '{}' ..."
-FILE_DONE_STATUS_MESSAGE = "File done! Result saved to '{}'"
-NOT_COMPRESSING_STATUS_MESSAGE = """Not compressing '{}'
+COMPRESSING_MULTIPLE = """Source directory: '{}'
+Output directory: '{}'
+Found '{}' PDF files. Starting compression ..."""
+ALL_FILES_DONE = """All files done!
+Results saved to '{}'"""
+COMPRESSING = "Compressing '{}' ..."
+FILE_DONE = "File done! Result saved to '{}'"
+NOT_COMPRESSING = """Not compressing '{}'
 Reason: Actual file size is {} bytes,
 lower limit for compression is {} bytes"""
-
+GS_NOT_INSTALLED = """Ghostscript not installed or not aliased to '{}'.
+Exiting ..."""
 
 def get_pdf_filenames_at(source_directory):
     """Find all PDF files in the specified directory.
@@ -58,13 +65,11 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
     try:
         file_size = os.stat(filepath).st_size
         if file_size < FILE_SIZE_LOWER_LIMIT:
-            if callable(status_callback):
-                status_callback(NOT_COMPRESSING_STATUS_MESSAGE.format(filepath, file_size,
-                                                                      FILE_SIZE_LOWER_LIMIT))
+            utils.if_callable_call_with_formatted_string(status_callback, NOT_COMPRESSING,
+                                                         filepath, file_size, FILE_SIZE_LOWER_LIMIT)
             process = subprocess.Popen(['cp', filepath, output_path])
         else:
-            if callable(status_callback):
-                status_callback(COMPRESSING_STATUS_MESSAGE.format(filepath))
+            utils.if_callable_call_with_formatted_string(status_callback, COMPRESSING, filepath)
             process = subprocess.Popen(
                 [ghostscript_binary, "-sDEVICE=pdfwrite",
                  "-dCompatabilityLevel=1.4", "-dPDFSETTINGS=/ebook",
@@ -72,13 +77,11 @@ def compress_pdf(filepath, output_path, ghostscript_binary, status_callback=None
                  "-sOutputFile=%s" % output_path, filepath]
                 )
     except FileNotFoundError:
-        if callable(status_callback):
-            status_callback("Ghostscript not installed or not aliased to %s. Exiting ..."
-                            % ghostscript_binary)
+        utils.if_callable_call_with_formatted_string(status_callback, GS_NOT_INSTALLED,
+                                                     ghostscript_binary)
         sys.exit(1)
     process.communicate()
-    if callable(status_callback):
-        status_callback(FILE_DONE_STATUS_MESSAGE.format(output_path))
+    utils.if_callable_call_with_formatted_string(status_callback, FILE_DONE, output_path)
 
 def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binary, status_callback=None):
     """Compress all PDF files in the current directory and place the output in the given output directory.
@@ -94,13 +97,11 @@ def compress_multiple_pdfs(source_directory, output_directory, ghostscript_binar
     """
     source_paths = get_pdf_filenames_at(source_directory)
     out_paths = list()
-    if callable(status_callback):
-        status_callback("Source directory: %s\nOutput directory: %s\nStarting compression of %d PDF files" % (
-            source_directory, output_directory, len(source_paths)))
+    utils.if_callable_call_with_formatted_string(status_callback, COMPRESSING_MULTIPLE,
+                                                 source_directory, output_directory, len(source_paths))
     for source_path in source_paths:
         output = os.path.join(output_directory, os.path.basename(source_path))
         out_paths.append(output)
         compress_pdf(source_path, output, ghostscript_binary, status_callback)
-    if callable(status_callback):
-        status_callback("All files processed!")
+    utils.if_callable_call_with_formatted_string(status_callback, ALL_FILES_DONE, output_directory)
     return out_paths

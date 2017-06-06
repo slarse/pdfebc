@@ -98,10 +98,10 @@ class CoreTest(unittest.TestCase):
             output_path = os.path.join(tmpoutdir, os.path.basename(pdf_file.name))
             pdfebc.core.compress_pdf(pdf_file.name, output_path,
                                      pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT, mock_status_callback)
-            expected_not_compressing_message = pdfebc.core.NOT_COMPRESSING_STATUS_MESSAGE.format(
+            expected_not_compressing_message = pdfebc.core.NOT_COMPRESSING.format(
                 pdf_file.name, 0,
                 pdfebc.core.FILE_SIZE_LOWER_LIMIT)
-            expected_done_message = pdfebc.core.FILE_DONE_STATUS_MESSAGE.format(output_path)
+            expected_done_message = pdfebc.core.FILE_DONE.format(output_path)
             mock_status_callback.assert_any_call(expected_not_compressing_message)
             mock_status_callback.assert_any_call(expected_done_message)
 
@@ -120,8 +120,8 @@ class CoreTest(unittest.TestCase):
             mock_popen_instance = mock_popen([])
             mock_popen_instance.communicate.assert_called_once()
             mock_status_callback.assert_called()
-            expected_compressing_message = pdfebc.core.COMPRESSING_STATUS_MESSAGE.format(pdf_file.name)
-            expected_done_message = pdfebc.core.FILE_DONE_STATUS_MESSAGE.format(output_path)
+            expected_compressing_message = pdfebc.core.COMPRESSING.format(pdf_file.name)
+            expected_done_message = pdfebc.core.FILE_DONE.format(output_path)
             mock_status_callback.assert_any_call(expected_compressing_message)
             mock_status_callback.assert_any_call(expected_done_message)
 
