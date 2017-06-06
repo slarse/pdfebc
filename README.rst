@@ -73,8 +73,8 @@ can be done like this:
     - Then execute ``source <path_to_config_file>``
 3. Verify the installation by executing ``pdfebc -h``. You should se usage information printed to stdout.
 4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
-of a configuration file. I strongly recommend that you use an `App password`_ instead of your actual 
-account password.
+   of a configuration file. I strongly recommend that you use an `App password`_ instead of your actual 
+   account password.
 
 Option 2: Clone the repo and the install with ``pip``
 -----------------------------------------------------
@@ -89,12 +89,12 @@ to PyPi. Unless you are planning to contribute something, I suggest going with t
     - For development, use ``pip install -e .`` in a ``virtualenv``.
 3. All done! Type ``pdfebc -h`` on the command line for usage.
 4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
-of a configuration file. I strongly recommend that you use an `App password`_ instead of your actual 
-account password.
+   of a configuration file. I strongly recommend that you use an `App password`_ instead of your actual 
+   account password.
 
 License
 =======
-This software is licensed under the MIT License. See the `LICENSE`_ file for specifics.
+This software is licensed under the MIT License. See the `license file`_ file for specifics.
 
 TODO
 ====
@@ -103,4 +103,4 @@ TODO
 
 .. _Docs: http://pdfebc.readthedocs.io/en/latest/
 .. _App password: https://support.google.com/accounts/answer/185833?hl=en
-.. _LICENSE: LICENSE
+.. _license file: LICENSE
