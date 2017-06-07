@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 """Module containing util functions for the pdfebc program.
 
-It uses Google's SMTP server for sending emails. If you wish to use another server, simply change
-the SMTP_SERVER variable to your preferred server.
+The SMTP server and port are configured in the config.cnf file.
 
 Requires a config file called 'email.cnf' in the user conf directory specified by appdirs. In the
-case of Arch Linux, this is '$HOME/.config/pdfebc/email.cnf', but this may vary with distributions.
+case of Arch Linux, this is '$HOME/.config/pdfebc/config.cnf', but this may vary with distributions.
 The config file should have the following format:
 
-    |[email]
-    |user = sender_email
-    |pass = password
-    |receiver = receiver_email
-
-All characters after the colon and whitespace (as much whitespace as you'd like) until
-EOL counts as the username/password.
+    |[EMAIL]
+    |user = <sender_email>
+    |pass = <password>
+    |receiver = <receiver_email>
+    |smtp_server = <smtp_server>
+    |smtp_port = <smtp_port>
 
 .. module:: utils
     :platform: Unix
@@ -29,21 +27,39 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 import appdirs
+from . import cli
 
-CONFIG_PATH = os.path.join(appdirs.user_config_dir('pdfebc'), 'email.cnf')
-SECTION_KEY = "email"
+CONFIG_FILENAME = 'config.cnf'
+CONFIG_PATH = os.path.join(appdirs.user_config_dir('pdfebc'), CONFIG_FILENAME)
+EMAIL_SECTION_KEY = "EMAIL"
 PASSWORD_KEY = "pass"
 USER_KEY = "user"
-RECIEVER_KEY = "receiver"
-SMTP_SERVER = "smtp.gmail.com"
+RECEIVER_KEY = "receiver"
+DEFAULT_SMTP_SERVER = "smtp.gmail.com"
+DEFAULT_SMTP_PORT = 587
+SMTP_SERVER_KEY = "smtp_server"
+SMTP_PORT_KEY = "smtp_port"
+EMAIL_SECTION_KEYS = {USER_KEY, PASSWORD_KEY, RECEIVER_KEY, SMTP_SERVER_KEY, SMTP_PORT_KEY}
+DEFAULT_SECTION_KEY = "DEFAULTS"
+GS_DEFAULT_BINARY_KEY = "gs_binary"
+SRC_DEFAULT_DIR_KEY = "src"
+OUT_DEFAULT_DIR_KEY = "out"
+DEFAULT_SECTION_KEYS = {GS_DEFAULT_BINARY_KEY, SRC_DEFAULT_DIR_KEY, OUT_DEFAULT_DIR_KEY}
+SECTION_KEYS = {EMAIL_SECTION_KEY: EMAIL_SECTION_KEYS,
+                DEFAULT_SECTION_KEY: DEFAULT_SECTION_KEYS}
 
 SENDING_PRECONF = """Sending files ...
 From: {}
 To: {}
 SMTP Server: {}
+SMTP Port: {}
+
 Files:
 {}"""
 FILES_SENT = "Files successfully sent!"""
+
+class ConfigurationError(configparser.ParsingError):
+    pass
 
 def create_email_config(user, password, receiver):
     """Create an email config.
@@ -57,10 +73,34 @@ def create_email_config(user, password, receiver):
         configparser.ConfigParser: A ConfigParser
     """
     config = configparser.ConfigParser()
-    config[SECTION_KEY] = {
+    config[EMAIL_SECTION_KEY] = {
         USER_KEY: user,
         PASSWORD_KEY: password,
-        RECIEVER_KEY: receiver}
+        RECEIVER_KEY: receiver}
+    return config
+
+def create_config(sections, section_contents):
+    """Create a config file from the provided sections and key value pairs.
+
+    Args:
+        sections (List[str]): A list of section keys.
+        key_value_pairs (Dict[str, str]): A list of of dictionaries. Must be as long as
+        the list of sections. That is to say, if there are two sections, there should be two
+        dicts.
+    Returns:
+        configparser.ConfigParser: A ConfigParser.
+    Raises:
+        ValueError
+    """
+    sections_length, section_contents_length = len(sections), len(section_contents)
+    if sections_length != section_contents_length:
+        raise ValueError("Mismatch between argument lengths.\n"
+                         "len(sections) = {}\n"
+                         "len(section_contents) = {}"
+                         .format(sections_length, section_contents_length))
+    config = configparser.ConfigParser()
+    for section, section_content in zip(sections, section_contents):
+        config[section] = section_content
     return config
 
 def write_config(config, config_path=CONFIG_PATH):
@@ -75,15 +115,13 @@ def write_config(config, config_path=CONFIG_PATH):
     with open(config_path, 'w', encoding='utf-8') as f:
         config.write(f)
 
-def read_email_config(config_path=CONFIG_PATH):
-    """Read the email config file.
+def read_config(config_path=CONFIG_PATH):
+    """Read the config information from the config file.
 
     Args:
         config_path (str): Relative path to the email config file.
-
     Returns:
-        (str, str, str): User email, user password and receiver email.
-
+        configparser.ConfigParser: A ConfigParser with the config information.
     Raises:
         IOError
     """
@@ -91,10 +129,37 @@ def read_email_config(config_path=CONFIG_PATH):
         raise IOError("No config file found at %s" % config_path)
     config = configparser.ConfigParser()
     config.read(config_path)
-    user = try_get_conf(config, SECTION_KEY, USER_KEY)
-    password = try_get_conf(config, SECTION_KEY, PASSWORD_KEY)
-    receiver = try_get_conf(config, SECTION_KEY, RECIEVER_KEY)
-    return user, password, receiver
+    check_config(config)
+    return config
+
+def section_is_healthy(section, expected_keys):
+    """Check that the section contains all keys it should.
+
+    Args:
+        section (configparser.SectionProxy): A map-like object.
+        expected_keys (Iterable): A Set of keys that should be contained in the section.
+    Returns:
+        boolean: True if the section is healthy, false if not.
+    """
+    return set(section.keys()) == set(expected_keys)
+
+def check_config(config):
+    """Check that all sections of the config contain the keys that they should.
+
+    Args:
+        config (configparser.ConfigParser): A ConfigParser.
+    Raises:
+        ConfigurationError
+    """
+    for section, expected_section_keys in SECTION_KEYS.items():
+        try:
+            section_content = config[section]
+            if not section_is_healthy(section_content, expected_section_keys):
+                raise ConfigurationError("The {} section of the configuration file is badly formed!"
+                                         .format(section))
+        except KeyError as e:
+            raise ConfigurationError("Config file badly formed! Section {} is missing."
+                                     .format(section))
 
 def try_get_conf(config, section, attribute):
     """Try to parse an attribute of the config file.
@@ -103,37 +168,34 @@ def try_get_conf(config, section, attribute):
         config (configparser.ConfigParser): A ConfigParser.
         section (str): The section of the config file to get information from.
         attribute (str): The attribute of the section to fetch.
-
     Returns:
         str: The string corresponding to the section and attribute.
-
     Raises:
-        configparser.ParseError
+        ConfigurationError
     """
     try:
         return config[section][attribute]
     except KeyError:
-        raise configparser.ParsingError("""Config file badly formed!\n
-                Failed to get attribute '%s' from section '%s'!""" % (attribute, section))
+        raise ConfigurationError("Config file badly formed!\n"
+                                 "Failed to get attribute '{}' from section '{}'!"
+                                 .format(attribute, section))
 
-def send_with_attachments(user, password, receiver, subject, message, filepaths):
+def send_with_attachments(subject, message, filepaths, config):
     """Send an email from the user (a gmail) to the receiver.
 
     Args:
-        user (str): The sender's email address.
-        password (str): The password to the 'user' address.
-        receiver (str): The receiver's email address.
         subject (str): Subject of the email.
         message (str): A message.
         filepaths (list(str)): Filepaths to files to be attached.
+        config (configparser.ConfigParser): A ConfigParser.
     """
     email_ = MIMEMultipart()
     email_.attach(MIMEText(message))
     email_["Subject"] = subject
-    email_["From"] = user
-    email_["To"] = receiver
+    email_["From"] = try_get_conf(config, EMAIL_SECTION_KEY, USER_KEY)
+    email_["To"] = try_get_conf(config, EMAIL_SECTION_KEY, RECEIVER_KEY)
     attach_files(filepaths, email_)
-    send_email(user, password, email_)
+    send_email(email_, config)
 
 
 def attach_files(filepaths, email_):
@@ -150,15 +212,18 @@ def attach_files(filepaths, email_):
             part["Content-Disposition"] = 'attachment; filename="%s"' % base
             email_.attach(part)
 
-def send_email(user, password, email_):
+def send_email(email_, config):
     """Send an email.
 
     Args:
-        user (str): Sender's email address.
-        password (str): Password to sender's email.
         email_ (email.MIMEMultipart): The email to send.
+        config (configparser.ConfigParser): A ConfigParser.
     """
-    server = smtplib.SMTP(SMTP_SERVER, 587)
+    smtp_server = try_get_conf(config, EMAIL_SECTION_KEY, SMTP_SERVER_KEY)
+    smtp_port = int(try_get_conf(config, EMAIL_SECTION_KEY, SMTP_PORT_KEY))
+    user = try_get_conf(config, EMAIL_SECTION_KEY, USER_KEY)
+    password = try_get_conf(config, EMAIL_SECTION_KEY, PASSWORD_KEY)
+    server = smtplib.SMTP(smtp_server, smtp_port)
     server.starttls()
     server.login(user, password)
     server.send_message(email_)
@@ -170,12 +235,16 @@ def send_files_preconf(filepaths, config_path=CONFIG_PATH, status_callback=None)
     Args:
         filepaths (list(str)): A list of filepaths.
     """
-    user, password, receiver = read_email_config(config_path)
+    config = read_config(config_path)
     subject = "PDF files from pdfebc"
     message = ""
-    args = (user, receiver, SMTP_SERVER, '\n'.join(filepaths))
+    args = (try_get_conf(config, EMAIL_SECTION_KEY, USER_KEY),
+            try_get_conf(config, EMAIL_SECTION_KEY, RECEIVER_KEY),
+            try_get_conf(config, EMAIL_SECTION_KEY, SMTP_SERVER_KEY),
+            try_get_conf(config, EMAIL_SECTION_KEY, SMTP_PORT_KEY),
+            '\n'.join(filepaths))
     if_callable_call_with_formatted_string(status_callback, SENDING_PRECONF, *args)
-    send_with_attachments(user, password, receiver, subject, message, filepaths)
+    send_with_attachments(subject, message, filepaths, config)
     if_callable_call_with_formatted_string(status_callback, FILES_SENT)
 
 def valid_config_exists(config_path=CONFIG_PATH):
@@ -189,8 +258,8 @@ def valid_config_exists(config_path=CONFIG_PATH):
     """
     if (os.path.isfile(config_path)):
         try:
-            read_email_config(config_path)
-        except configparser.ParsingError:
+            read_config(config_path)
+        except ConfigurationError or IOError:
             return False
     else:
         return False

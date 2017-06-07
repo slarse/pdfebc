@@ -6,6 +6,7 @@ Author: Simon Larsén
 import os
 import shutil
 import smtplib
+import sys
 from . import cli, core, utils
 
 AUTH_ERROR = """An authentication error has occured!
@@ -24,7 +25,14 @@ Please open an issue about this error at 'https://github.com/slarse/pdfebc/issue
 
 def main():
     """Run PDFEBC."""
-    parser = cli.create_argparser()
+    try:
+        parser = cli.create_argparser()
+    except utils.ConfigurationError as e:
+        print("FIRST TIME CONFIG NOT YET IMPLEMENTED")
+        print("FIX THE CONFIG FILE!")
+        print("EXITING!")
+        print(e)
+        sys.exit(1)
     args = parser.parse_args()
     if not args.nomakedir:
         os.makedirs(args.outdir)

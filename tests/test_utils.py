@@ -17,9 +17,27 @@ class UtilsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.expected_user = "test_user"
-        cls.expected_password = "test_password"
-        cls.expected_receiver = "test_receiver"
+        cls.user = 'test_user'
+        cls.password = 'test_password'
+        cls.receiver = 'test_receiver'
+        cls.smtp_server = 'test_server'
+        cls.smtp_port = 999
+        cls.user_key = pdfebc.utils.USER_KEY
+        cls.password_key = pdfebc.utils.PASSWORD_KEY
+        cls.receiver_key = pdfebc.utils.RECEIVER_KEY
+        cls.smtp_server_key = pdfebc.utils.SMTP_SERVER_KEY
+        cls.smtp_port_key = pdfebc.utils.SMTP_PORT_KEY
+        cls.gs_binary_default_key = pdfebc.utils.GS_DEFAULT_BINARY_KEY
+        cls.out_dir_default_key = pdfebc.utils.OUT_DEFAULT_DIR_KEY
+        cls.src_dir_default_key = pdfebc.utils.SRC_DEFAULT_DIR_KEY
+        cls.email_section_key = pdfebc.utils.EMAIL_SECTION_KEY
+        cls.default_section_key = pdfebc.utils.DEFAULT_SECTION_KEY
+        cls.email_section_keys = {cls.user_key, cls.password_key, cls.receiver_key,
+                                  cls.smtp_server_key, cls.smtp_port_key}
+        cls.default_section_keys = {cls.gs_binary_default_key, cls.src_dir_default_key, cls.out_dir_default_key}
+        cls.section_keys = {cls.email_section_key: cls.email_section_keys,
+                            cls.default_section_key: cls.default_section_keys}
+
 
     @classmethod
     def setUp(cls):
@@ -30,12 +48,21 @@ class UtilsTest(unittest.TestCase):
                 encoding='utf-8', suffix=pdfebc.core.PDF_EXTENSION, mode='w', delete=False)
             cls.attachment_filenames.append(file.name)
             file.close()
-        cls.valid_config = pdfebc.utils.create_email_config(cls.expected_user,
-                                                            cls.expected_password,
-                                                            cls.expected_receiver)
+        cls.valid_config = configparser.ConfigParser()
+        cls.valid_config[pdfebc.utils.EMAIL_SECTION_KEY] = ({
+            cls.user_key: cls.user,
+            cls.password_key: cls.password,
+            cls.receiver_key: cls.receiver,
+            cls.smtp_server_key: cls.smtp_server,
+            cls.smtp_port_key: cls.smtp_port})
+        cls.valid_config[pdfebc.utils.DEFAULT_SECTION_KEY] = {
+            cls.gs_binary_default_key: pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT,
+            cls.src_dir_default_key: pdfebc.cli.SOURCE_DIR_DEFAULT,
+            cls.out_dir_default_key: pdfebc.cli.OUTPUT_DIR_DEFAULT}
         cls.invalid_config = configparser.ConfigParser()
-        cls.invalid_config[pdfebc.utils.SECTION_KEY] = {pdfebc.utils.USER_KEY: cls.expected_user,
-                                                        pdfebc.utils.PASSWORD_KEY: cls.expected_password}
+        cls.invalid_config[pdfebc.utils.EMAIL_SECTION_KEY] = {
+            cls.user_key: cls.user,
+            cls.password_key: cls.password}
 
     @classmethod
     def tearDown(cls):
@@ -44,42 +71,73 @@ class UtilsTest(unittest.TestCase):
         for filename in cls.attachment_filenames:
             os.unlink(filename)
 
+    def test_create_config(self):
+        sections = self.section_keys.keys()
+        section_contents = [{
+            self.user_key: self.user,
+            self.password_key: self.password,
+            self.receiver_key: self.receiver,
+            self.smtp_server_key: pdfebc.utils.DEFAULT_SMTP_SERVER,
+            self.smtp_port_key: str(pdfebc.utils.DEFAULT_SMTP_PORT)},
+           {self.gs_binary_default_key: pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT,
+            self.src_dir_default_key: pdfebc.cli.SOURCE_DIR_DEFAULT,
+            self.out_dir_default_key: pdfebc.cli.OUTPUT_DIR_DEFAULT}]
+        config = pdfebc.utils.create_config(sections, section_contents)
+        for section, section_content in zip(sections, section_contents):
+            config_section = config[section]
+            for section_content_key, section_content_value in section_content.items():
+                self.assertEqual(section_content_value, config_section[section_content_key])
+
+    def test_create_config_too_few_sections(self):
+        sections = ["EMAIL"]
+        section_contents = [{1: 2, 3: 4}, {1: 2}]
+        with self.assertRaises(ValueError):
+            pdfebc.utils.create_config(sections, section_contents)
+
     def test_write_valid_email_config(self):
         self.temp_config_file.close()
         pdfebc.utils.write_config(self.valid_config, self.temp_config_file.name)
         config = configparser.ConfigParser()
         with open(self.temp_config_file.name) as file:
             config.read_file(file)
-        section = config[pdfebc.utils.SECTION_KEY]
-        self.assertEqual(self.expected_user, section[pdfebc.utils.USER_KEY])
-        self.assertEqual(self.expected_password, section[pdfebc.utils.PASSWORD_KEY])
-        self.assertEqual(self.expected_receiver, section[pdfebc.utils.RECIEVER_KEY])
+        section = config[pdfebc.utils.EMAIL_SECTION_KEY]
+        self.assertEqual(self.user, section[self.user_key])
+        self.assertEqual(self.password, section[self.password_key])
+        self.assertEqual(self.receiver, section[self.receiver_key])
 
     def test_read_valid_email_config(self):
         self.valid_config.write(self.temp_config_file)
         self.temp_config_file.flush()
         self.temp_config_file.close()
-        actual_user, actual_password, actual_receiver = pdfebc.utils.read_email_config(self.temp_config_file.name)
-        self.assertEqual(self.expected_user, actual_user)
-        self.assertEqual(self.expected_password, actual_password)
-        self.assertEqual(self.expected_receiver, actual_receiver)
+        email_section = pdfebc.utils.read_config(self.temp_config_file.name)[
+            pdfebc.utils.EMAIL_SECTION_KEY]
+        actual_user = email_section[self.user_key]
+        actual_password = email_section[self.password_key]
+        actual_receiver = email_section[self.receiver_key]
+        actual_smtp_server = email_section[self.smtp_server_key]
+        actual_smtp_port = int(email_section[self.smtp_port_key])
+        self.assertEqual(self.user, actual_user)
+        self.assertEqual(self.password, actual_password)
+        self.assertEqual(self.receiver, actual_receiver)
+        self.assertEqual(self.smtp_server, actual_smtp_server)
+        self.assertEqual(self.smtp_port, actual_smtp_port)
 
-    def test_read_empty_email_config(self):
-        with self.assertRaises(configparser.ParsingError) as context:
-            pdfebc.utils.read_email_config(self.temp_config_file.name)
+    def test_read_empty_config(self):
+        with self.assertRaises(pdfebc.utils.ConfigurationError) as context:
+            pdfebc.utils.read_config(self.temp_config_file.name)
 
-    def test_read_email_config_no_file(self):
+    def test_read_config_no_file(self):
         with tempfile.NamedTemporaryFile() as tmp:
             config_path = tmp.name
         with self.assertRaises(IOError) as context:
-            pdfebc.utils.read_email_config(config_path)
+            pdfebc.utils.read_config(config_path)
 
-    def test_read_email_config_without_receiver(self):
+    def test_read_config_with_only_user_and_password(self):
         self.invalid_config.write(self.temp_config_file)
         self.temp_config_file.flush()
         self.temp_config_file.close()
-        with self.assertRaises(configparser.ParsingError) as context:
-            pdfebc.utils.read_email_config(self.temp_config_file.name)
+        with self.assertRaises(pdfebc.utils.ConfigurationError) as context:
+            pdfebc.utils.read_config(self.temp_config_file.name)
 
     def test_attach_valid_files(self):
         email_ = MIMEMultipart()
@@ -94,43 +152,43 @@ class UtilsTest(unittest.TestCase):
 
     @patch('smtplib.SMTP')
     def test_send_valid_email(self, mock_smtp):
-        mock_smtp_instance = mock_smtp()
-        user, password, receiver = "test_user", "test_password", "test_receiver"
         subject = "Test e-mail"
         email_ = MIMEMultipart()
-        email_['From'] = user
-        email_['To'] = receiver
+        email_['From'] = self.user
+        email_['To'] = self.receiver
         email_['Subject'] = subject
-        pdfebc.utils.send_email(user, password, email_)
+        pdfebc.utils.send_email(email_, self.valid_config)
+        mock_smtp.assert_called_once_with(self.smtp_server, self.smtp_port)
+        mock_smtp_instance = mock_smtp()
         mock_smtp_instance.starttls.assert_called_once()
-        mock_smtp_instance.login.assert_called_once_with(user, password)
+        mock_smtp_instance.login.assert_called_once_with(self.user, self.password)
         mock_smtp_instance.send_message.assert_called_once_with(email_)
         mock_smtp_instance.quit.assert_called_once()
 
     @patch('smtplib.SMTP')
     def test_send_valid_email_with_attachments(self, mock_smtp):
-        mock_smtp_instance = mock_smtp()
         subject = "Test e-mail"
         message = "Test e-mail body"
-        pdfebc.utils.send_with_attachments(self.expected_user, self.expected_password,
-                                           self.expected_receiver, subject, message,
-                                           self.attachment_filenames)
+        pdfebc.utils.send_with_attachments(subject, message, self.attachment_filenames,
+                                           self.valid_config)
+        mock_smtp.assert_called_once_with(self.smtp_server, self.smtp_port)
+        mock_smtp_instance = mock_smtp()
         mock_smtp_instance.starttls.assert_called_once()
-        mock_smtp_instance.login.assert_called_once_with(self.expected_user, self.expected_password)
+        mock_smtp_instance.login.assert_called_once_with(self.user, self.password)
         mock_smtp_instance.send_message.assert_called_once()
         mock_smtp_instance.quit.assert_called_once()
 
     def test_create_email_config(self):
-        section_key = pdfebc.utils.SECTION_KEY
-        user_key = pdfebc.utils.USER_KEY
-        password_key = pdfebc.utils.PASSWORD_KEY
-        receiver_key = pdfebc.utils.RECIEVER_KEY
+        section_key = pdfebc.utils.EMAIL_SECTION_KEY
+        user_key = self.user_key
+        password_key = self.password_key
+        receiver_key = self.receiver_key
         actual_user = self.valid_config[section_key][user_key]
         actual_password = self.valid_config[section_key][password_key]
         actual_receiver = self.valid_config[section_key][receiver_key]
-        self.assertEqual(self.expected_user, actual_user)
-        self.assertEqual(self.expected_password, actual_password)
-        self.assertEqual(self.expected_receiver, actual_receiver)
+        self.assertEqual(self.user, actual_user)
+        self.assertEqual(self.password, actual_password)
+        self.assertEqual(self.receiver, actual_receiver)
 
     def test_valid_config_exists_no_config(self):
         with tempfile.NamedTemporaryFile() as file:
@@ -143,7 +201,7 @@ class UtilsTest(unittest.TestCase):
         config_path = self.temp_config_file.name
         self.assertTrue(pdfebc.utils.valid_config_exists(config_path))
 
-    def test_valid_config_exists_with_config_without_receiver(self):
+    def test_valid_config_exists_with_invalid_config(self):
         self.invalid_config.write(self.temp_config_file)
         self.temp_config_file.close()
         config_path = self.temp_config_file.name
@@ -201,12 +259,12 @@ class UtilsTest(unittest.TestCase):
         pdfebc.utils.send_files_preconf(self.attachment_filenames, config_path=self.temp_config_file.name,
                                         status_callback=mock_status_callback)
         mock_smtp_instance.starttls.assert_called_once()
-        mock_smtp_instance.login.assert_called_once_with(self.expected_user, self.expected_password)
+        mock_smtp_instance.login.assert_called_once_with(self.user, self.password)
         mock_smtp_instance.send_message.assert_called_once()
         mock_smtp_instance.quit.assert_called_once()
         expected_send_message = pdfebc.utils.SENDING_PRECONF.format(
-            self.expected_user, self.expected_receiver,
-            pdfebc.utils.SMTP_SERVER, '\n'.join(self.attachment_filenames))
+            self.user, self.receiver,
+            self.smtp_server, self.smtp_port, '\n'.join(self.attachment_filenames))
         expected_sent_message = pdfebc.utils.FILES_SENT
         mock_status_callback.assert_any_call(expected_send_message)
         mock_status_callback.assert_any_call(expected_sent_message)
