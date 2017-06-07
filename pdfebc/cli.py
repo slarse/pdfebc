@@ -14,37 +14,58 @@ OUTPUT_DIR_DEFAULT = "pdfebc_out"
 SOURCE_DIR_DEFAULT = "."
 GHOSTSCRIPT_BINARY_DEFAULT = "gs"
 
+DESCRIPTION = "Compresses all pdf files in the current directory"
+OUTPUT_DIR_SHORT = "-o"
+OUTPUT_DIR_LONG = "--outdir"
+OUTPUT_DIR_HELP = "Output directory. If not specified, default is '{}'".format(OUTPUT_DIR_DEFAULT)
+SOURCE_DIR_SHORT = "-src"
+SOURCE_DIR_LONG = "--sourcedir"
+SOURCE_DIR_HELP = "Source directory. Default is '{}'".format(SOURCE_DIR_DEFAULT)
+NO_MAKEDIR_SHORT = "-nm"
+NO_MAKEDIR_LONG = "--nomakedir"
+NO_MAKEDIR_HELP = "Do not create the output directory."
+GS_SHORT = "-gs"
+GS_LONG = "--ghostscript"
+GS_HELP = "Specify the name of the Ghostscript binary. Default is '{}'.".format(
+    GHOSTSCRIPT_BINARY_DEFAULT)
+SEND_SHORT = "-s"
+SEND_LONG = "--send"
+SEND_HELP = "Attempt to send the compressed PDF files with the settings in config.ini."
+CLEAN_SHORT = "-c"
+CLEAN_LONG = "--clean"
+CLEAN_HELP = """Automatically remove output directory after finishing the program.
+Most useful in conjuction with --send."""
+
 def create_argparser():
     """
     Returns:
         argparse.ArgumentParser: The argument parser for pdfebc.
     """
     parser = argparse.ArgumentParser(
-        description="Compresses all pdf files in the current directory"
+        description=DESCRIPTION
         )
     parser.add_argument(
-        "-o", "--outdir", help="Output directory. If not specified, default is '%s'" % OUTPUT_DIR_DEFAULT, type=str,
+        OUTPUT_DIR_SHORT, OUTPUT_DIR_LONG, help=OUTPUT_DIR_HELP, type=str,
         default=OUTPUT_DIR_DEFAULT
         )
     parser.add_argument(
-        "-src", "--sourcedir", help="Source directory. Default is '%s'" % SOURCE_DIR_DEFAULT, type=str,
+        SOURCE_DIR_SHORT, SOURCE_DIR_LONG, help=SOURCE_DIR_HELP, type=str,
         default=SOURCE_DIR_DEFAULT
         )
     parser.add_argument(
-        "-nm", "--nomakedir", help="Do not create the output directory.",
+        NO_MAKEDIR_SHORT, NO_MAKEDIR_LONG, help=NO_MAKEDIR_HELP,
         action="store_true"
         )
     parser.add_argument(
-        "-gs", "--ghostscript", help="Specify the name of the Ghostscript binary. Default is '%s'." % GHOSTSCRIPT_BINARY_DEFAULT,
+        GS_SHORT, GS_LONG, help=GS_HELP,
         type=str, default=GHOSTSCRIPT_BINARY_DEFAULT
         )
     parser.add_argument(
-        "-s", "--send", help="Attempt to send the compressed PDF files with the settings in config.ini.",
+        SEND_SHORT, SEND_LONG, help=SEND_HELP,
         action="store_true"
         )
     parser.add_argument(
-        '-c', '--clean', help="""Automatically remove output directory after finishing the program.
-                                 Most useful in conjuction with --send.""",
+        CLEAN_SHORT, CLEAN_LONG, help=CLEAN_HELP,
         action='store_true'
         )
     return parser
