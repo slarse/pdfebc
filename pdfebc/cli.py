@@ -9,6 +9,7 @@
 """
 import argparse
 import sys
+from . import utils
 
 OUTPUT_DIR_DEFAULT = "pdfebc_out"
 SOURCE_DIR_DEFAULT = "."
@@ -41,16 +42,20 @@ def create_argparser():
     Returns:
         argparse.ArgumentParser: The argument parser for pdfebc.
     """
+    config = utils.read_config()
+    out_dir_default = utils.try_get_conf(config, utils.DEFAULT_SECTION_KEY, utils.OUT_DEFAULT_DIR_KEY)
+    src_dir_default = utils.try_get_conf(config, utils.DEFAULT_SECTION_KEY, utils.SRC_DEFAULT_DIR_KEY)
+    gs_default_binary = utils.try_get_conf(config, utils.DEFAULT_SECTION_KEY, utils.GS_DEFAULT_BINARY_KEY)
     parser = argparse.ArgumentParser(
         description=DESCRIPTION
         )
     parser.add_argument(
         OUTPUT_DIR_SHORT, OUTPUT_DIR_LONG, help=OUTPUT_DIR_HELP, type=str,
-        default=OUTPUT_DIR_DEFAULT
+        default=out_dir_default
         )
     parser.add_argument(
         SOURCE_DIR_SHORT, SOURCE_DIR_LONG, help=SOURCE_DIR_HELP, type=str,
-        default=SOURCE_DIR_DEFAULT
+        default=src_dir_default
         )
     parser.add_argument(
         NO_MAKEDIR_SHORT, NO_MAKEDIR_LONG, help=NO_MAKEDIR_HELP,
@@ -58,7 +63,7 @@ def create_argparser():
         )
     parser.add_argument(
         GS_SHORT, GS_LONG, help=GS_HELP,
-        type=str, default=GHOSTSCRIPT_BINARY_DEFAULT
+        type=str, default=gs_default_binary
         )
     parser.add_argument(
         SEND_SHORT, SEND_LONG, help=SEND_HELP,
