@@ -34,15 +34,13 @@ def main():
         print(e)
         sys.exit(1)
     args = parser.parse_args()
-    if not args.nomakedir:
-        os.makedirs(args.outdir)
-    filepaths = core.compress_multiple_pdfs(args.sourcedir, args.outdir,
+    os.makedirs(args.outdir)
+    filepaths = core.compress_multiple_pdfs(args.srcdir, args.outdir,
                                             args.ghostscript, cli.status_callback)
-    if args.send:
+    if args.email:
         if not utils.valid_config_exists():
-            user, password, receiver = cli.prompt_for_config_values()
-            config = utils.create_email_config(user, password, receiver)
-            utils.write_config(config)
+            # TODO Add step-by-step config creation here.
+            pass
         try:
             utils.send_files_preconf(filepaths, status_callback=cli.status_callback)
         except smtplib.SMTPAuthenticationError as e:

@@ -157,7 +157,7 @@ class UtilsTest(unittest.TestCase):
         email_['From'] = self.user
         email_['To'] = self.receiver
         email_['Subject'] = subject
-        pdfebc.utils.send_email(email_, self.valid_config)
+        pdfebc.utils.send_email(email_, self.valid_config._sections)
         mock_smtp.assert_called_once_with(self.smtp_server, self.smtp_port)
         mock_smtp_instance = mock_smtp()
         mock_smtp_instance.starttls.assert_called_once()
@@ -170,7 +170,7 @@ class UtilsTest(unittest.TestCase):
         subject = "Test e-mail"
         message = "Test e-mail body"
         pdfebc.utils.send_with_attachments(subject, message, self.attachment_filenames,
-                                           self.valid_config)
+                                           self.valid_config._sections)
         mock_smtp.assert_called_once_with(self.smtp_server, self.smtp_port)
         mock_smtp_instance = mock_smtp()
         mock_smtp_instance.starttls.assert_called_once()

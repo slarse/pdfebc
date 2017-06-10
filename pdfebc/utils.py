@@ -61,24 +61,6 @@ FILES_SENT = "Files successfully sent!"""
 class ConfigurationError(configparser.ParsingError):
     pass
 
-def create_email_config(user, password, receiver):
-    """Create an email config.
-
-    Args:
-        user (str): User e-mail address.
-        password (str): Password to user e-mail address.
-        receiver: Reciever e-mail address.
-
-    Returns:
-        configparser.ConfigParser: A ConfigParser
-    """
-    config = configparser.ConfigParser()
-    config[EMAIL_SECTION_KEY] = {
-        USER_KEY: user,
-        PASSWORD_KEY: password,
-        RECEIVER_KEY: receiver}
-    return config
-
 def create_config(sections, section_contents):
     """Create a config file from the provided sections and key value pairs.
 
@@ -121,7 +103,7 @@ def read_config(config_path=CONFIG_PATH):
     Args:
         config_path (str): Relative path to the email config file.
     Returns:
-        configparser.ConfigParser: A ConfigParser with the config information.
+        OrderedDict: An OrderedDict with the config information.
     Raises:
         IOError
     """
@@ -129,14 +111,14 @@ def read_config(config_path=CONFIG_PATH):
         raise IOError("No config file found at %s" % config_path)
     config = configparser.ConfigParser()
     config.read(config_path)
-    check_config(config)
-    return config
+    check_config(config._sections)
+    return config._sections
 
 def section_is_healthy(section, expected_keys):
     """Check that the section contains all keys it should.
 
     Args:
-        section (configparser.SectionProxy): A map-like object.
+        section (OrderedDict): An OrderedDict.
         expected_keys (Iterable): A Set of keys that should be contained in the section.
     Returns:
         boolean: True if the section is healthy, false if not.
@@ -147,25 +129,24 @@ def check_config(config):
     """Check that all sections of the config contain the keys that they should.
 
     Args:
-        config (configparser.ConfigParser): A ConfigParser.
+        config (OrderedDict): An OrderedDict.
     Raises:
         ConfigurationError
     """
     for section, expected_section_keys in SECTION_KEYS.items():
-        try:
-            section_content = config[section]
-            if not section_is_healthy(section_content, expected_section_keys):
-                raise ConfigurationError("The {} section of the configuration file is badly formed!"
-                                         .format(section))
-        except KeyError as e:
+        section_content = config.get(section)
+        if not section_content:
             raise ConfigurationError("Config file badly formed! Section {} is missing."
+                                     .format(section))
+        elif not section_is_healthy(section_content, expected_section_keys):
+            raise ConfigurationError("The {} section of the configuration file is badly formed!"
                                      .format(section))
 
 def try_get_conf(config, section, attribute):
     """Try to parse an attribute of the config file.
 
     Args:
-        config (configparser.ConfigParser): A ConfigParser.
+        config (OrderedDict): An OrderedDict.
         section (str): The section of the config file to get information from.
         attribute (str): The attribute of the section to fetch.
     Returns:
@@ -173,12 +154,14 @@ def try_get_conf(config, section, attribute):
     Raises:
         ConfigurationError
     """
-    try:
-        return config[section][attribute]
-    except KeyError:
-        raise ConfigurationError("Config file badly formed!\n"
-                                 "Failed to get attribute '{}' from section '{}'!"
-                                 .format(attribute, section))
+    section = config.get(section)
+    if section:
+        option = section.get(attribute)
+        if option:
+            return option
+    raise ConfigurationError("Config file badly formed!\n"
+                             "Failed to get attribute '{}' from section '{}'!"
+                             .format(attribute, section))
 
 def send_with_attachments(subject, message, filepaths, config):
     """Send an email from the user (a gmail) to the receiver.
@@ -187,7 +170,7 @@ def send_with_attachments(subject, message, filepaths, config):
         subject (str): Subject of the email.
         message (str): A message.
         filepaths (list(str)): Filepaths to files to be attached.
-        config (configparser.ConfigParser): A ConfigParser.
+        config (OrderedDict): An OrderedDict.
     """
     email_ = MIMEMultipart()
     email_.attach(MIMEText(message))
@@ -217,7 +200,7 @@ def send_email(email_, config):
 
     Args:
         email_ (email.MIMEMultipart): The email to send.
-        config (configparser.ConfigParser): A ConfigParser.
+        config (OrderedDict): An OrderedDict.
     """
     smtp_server = try_get_conf(config, EMAIL_SECTION_KEY, SMTP_SERVER_KEY)
     smtp_port = int(try_get_conf(config, EMAIL_SECTION_KEY, SMTP_PORT_KEY))
