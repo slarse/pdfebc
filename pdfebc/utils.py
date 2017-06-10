@@ -117,7 +117,6 @@ def read_config(config_path=CONFIG_PATH):
     config_parser = configparser.ConfigParser()
     config_parser.read(config_path)
     config = config_parser_to_defaultdict(config_parser)
-    check_config(config)
     return config
 
 def config_parser_to_defaultdict(config_parser):
@@ -160,6 +159,30 @@ def check_config(config):
         elif not section_is_healthy(section_content, expected_section_keys):
             raise ConfigurationError("The {} section of the configuration file is badly formed!"
                                      .format(section))
+
+def run_config_diagnostics(config_path=CONFIG_PATH):
+    """Run diagnostics on the configuration file.
+
+    Args:
+        config_path (str): Path to the configuration file.
+    Returns:
+        str, Set[str], dict(str, Set[str]): The path to the configuration file, a set of missing sections
+        and a dict that maps each section to the entries that have either missing or empty options.
+    """
+    config = read_config(config_path)
+    missing_sections = set()
+    malformed_entries = defaultdict(set)
+    for section, expected_section_keys in SECTION_KEYS.items():
+        section_content = config.get(section)
+        if not section_content:
+            missing_sections.add(section)
+        else:
+            for option in expected_section_keys:
+                option_value = section_content.get(option)
+                if not option_value:
+                    print(option)
+                    malformed_entries[section].add(option)
+    return config_path, missing_sections, malformed_entries
 
 def try_get_conf(config, section, attribute):
     """Try to parse an attribute of the config file.
@@ -260,7 +283,8 @@ def valid_config_exists(config_path=CONFIG_PATH):
     """
     if (os.path.isfile(config_path)):
         try:
-            read_config(config_path)
+            config = read_config(config_path)
+            check_config(config)
         except ConfigurationError or IOError:
             return False
     else:

@@ -122,22 +122,11 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(self.smtp_server, actual_smtp_server)
         self.assertEqual(self.smtp_port, actual_smtp_port)
 
-    def test_read_empty_config(self):
-        with self.assertRaises(pdfebc.utils.ConfigurationError) as context:
-            pdfebc.utils.read_config(self.temp_config_file.name)
-
     def test_read_config_no_file(self):
         with tempfile.NamedTemporaryFile() as tmp:
             config_path = tmp.name
         with self.assertRaises(IOError) as context:
             pdfebc.utils.read_config(config_path)
-
-    def test_read_config_with_only_user_and_password(self):
-        self.invalid_config.write(self.temp_config_file)
-        self.temp_config_file.flush()
-        self.temp_config_file.close()
-        with self.assertRaises(pdfebc.utils.ConfigurationError) as context:
-            pdfebc.utils.read_config(self.temp_config_file.name)
 
     def test_attach_valid_files(self):
         email_ = MIMEMultipart()
@@ -268,3 +257,42 @@ class UtilsTest(unittest.TestCase):
         expected_sent_message = pdfebc.utils.FILES_SENT
         mock_status_callback.assert_any_call(expected_send_message)
         mock_status_callback.assert_any_call(expected_sent_message)
+
+    def test_run_config_diagnostics_valid_config(self):
+        self.valid_config.write(self.temp_config_file)
+        self.temp_config_file.close()
+        config_path, missing_sections, malformed_entries = pdfebc.utils.run_config_diagnostics(
+            self.temp_config_file.name)
+        self.assertEqual(self.temp_config_file.name, config_path)
+        self.assertFalse(missing_sections)
+        self.assertFalse(malformed_entries)
+
+    def test_run_config_diagnostics_empty_config(self):
+        config = configparser.ConfigParser()
+        config.write(self.temp_config_file)
+        config_path, missing_sections, malformed_entries = pdfebc.utils.run_config_diagnostics(
+            self.temp_config_file.name)
+        self.assertEqual(self.temp_config_file.name, config_path)
+        self.assertEqual(self.section_keys.keys(), missing_sections)
+        self.assertFalse(malformed_entries)
+
+    def test_run_config_diagnostics_empty_sections(self):
+        config = configparser.ConfigParser()
+        for section in self.section_keys.keys():
+            config[section] = {}
+        config.write(self.temp_config_file)
+        config_path, missing_sections, malformed_entries = pdfebc.utils.run_config_diagnostics(
+            self.temp_config_file.name)
+        self.assertEqual(self.temp_config_file.name, config_path)
+        self.assertEqual(self.section_keys.keys(), missing_sections)
+        self.assertFalse(malformed_entries)
+
+    def test_run_config_diagnostics_missing_section_and_options(self):
+        self.invalid_config.write(self.temp_config_file)
+        self.temp_config_file.close()
+        config_path, missing_sections, malformed_entries = pdfebc.utils.run_config_diagnostics(
+            self.temp_config_file.name)
+        self.assertEqual(self.temp_config_file.name, config_path)
+        expected_missing_email_options = self.email_section_keys - {self.user_key, self.password_key}
+        self.assertEqual({self.default_section_key}, missing_sections)
+        self.assertEqual(expected_missing_email_options, malformed_entries[self.email_section_key])
