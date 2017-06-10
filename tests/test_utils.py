@@ -57,8 +57,8 @@ class UtilsTest(unittest.TestCase):
             cls.smtp_port_key: cls.smtp_port})
         cls.valid_config[pdfebc.utils.DEFAULT_SECTION_KEY] = {
             cls.gs_binary_default_key: pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT,
-            cls.src_dir_default_key: pdfebc.cli.SOURCE_DIR_DEFAULT,
-            cls.out_dir_default_key: pdfebc.cli.OUTPUT_DIR_DEFAULT}
+            cls.src_dir_default_key: pdfebc.cli.SRC_DIR_DEFAULT,
+            cls.out_dir_default_key: pdfebc.cli.OUT_DIR_DEFAULT}
         cls.invalid_config = configparser.ConfigParser()
         cls.invalid_config[pdfebc.utils.EMAIL_SECTION_KEY] = {
             cls.user_key: cls.user,
@@ -80,8 +80,8 @@ class UtilsTest(unittest.TestCase):
             self.smtp_server_key: pdfebc.utils.DEFAULT_SMTP_SERVER,
             self.smtp_port_key: str(pdfebc.utils.DEFAULT_SMTP_PORT)},
            {self.gs_binary_default_key: pdfebc.cli.GHOSTSCRIPT_BINARY_DEFAULT,
-            self.src_dir_default_key: pdfebc.cli.SOURCE_DIR_DEFAULT,
-            self.out_dir_default_key: pdfebc.cli.OUTPUT_DIR_DEFAULT}]
+            self.src_dir_default_key: pdfebc.cli.SRC_DIR_DEFAULT,
+            self.out_dir_default_key: pdfebc.cli.OUT_DIR_DEFAULT}]
         config = pdfebc.utils.create_config(sections, section_contents)
         for section, section_content in zip(sections, section_contents):
             config_section = config[section]
