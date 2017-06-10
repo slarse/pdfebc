@@ -13,6 +13,11 @@ The config file should have the following format:
     |receiver = <receiver_email>
     |smtp_server = <smtp_server>
     |smtp_port = <smtp_port>
+    |
+    |[DEFAULTS]
+    |gs_binary = <ghostscript_binary>
+    |src = <source_dir>
+    |out = <out_dir>
 
 .. module:: utils
     :platform: Unix
