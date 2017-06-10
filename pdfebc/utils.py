@@ -26,6 +26,7 @@ import configparser
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
+from collections import defaultdict
 import appdirs
 from . import cli
 
@@ -103,22 +104,36 @@ def read_config(config_path=CONFIG_PATH):
     Args:
         config_path (str): Relative path to the email config file.
     Returns:
-        OrderedDict: An OrderedDict with the config information.
+        defaultdict: A defaultdict with the config information.
     Raises:
         IOError
     """
     if not os.path.isfile(config_path):
         raise IOError("No config file found at %s" % config_path)
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    check_config(config._sections)
-    return config._sections
+    config_parser = configparser.ConfigParser()
+    config_parser.read(config_path)
+    config = config_parser_to_defaultdict(config_parser)
+    check_config(config)
+    return config
+
+def config_parser_to_defaultdict(config_parser):
+    """Convert a ConfigParser to a defaultdict.
+
+    Args:
+        config_parser (ConfigParser): A ConfigParser.
+    """
+    config = defaultdict(defaultdict)
+    for section, section_content in config_parser.items():
+        if section != 'DEFAULT':
+            for option, option_value in section_content.items():
+                config[section][option] = option_value
+    return config
 
 def section_is_healthy(section, expected_keys):
     """Check that the section contains all keys it should.
 
     Args:
-        section (OrderedDict): An OrderedDict.
+        section (defaultdict): A defaultdict.
         expected_keys (Iterable): A Set of keys that should be contained in the section.
     Returns:
         boolean: True if the section is healthy, false if not.
@@ -129,7 +144,7 @@ def check_config(config):
     """Check that all sections of the config contain the keys that they should.
 
     Args:
-        config (OrderedDict): An OrderedDict.
+        config (defaultdict): A defaultdict.
     Raises:
         ConfigurationError
     """
@@ -146,7 +161,7 @@ def try_get_conf(config, section, attribute):
     """Try to parse an attribute of the config file.
 
     Args:
-        config (OrderedDict): An OrderedDict.
+        config (defaultdict): A defaultdict.
         section (str): The section of the config file to get information from.
         attribute (str): The attribute of the section to fetch.
     Returns:
@@ -170,7 +185,7 @@ def send_with_attachments(subject, message, filepaths, config):
         subject (str): Subject of the email.
         message (str): A message.
         filepaths (list(str)): Filepaths to files to be attached.
-        config (OrderedDict): An OrderedDict.
+        config (defaultdict): A defaultdict.
     """
     email_ = MIMEMultipart()
     email_.attach(MIMEText(message))
@@ -200,7 +215,7 @@ def send_email(email_, config):
 
     Args:
         email_ (email.MIMEMultipart): The email to send.
-        config (OrderedDict): An OrderedDict.
+        config (defaultdict): A defaultdict.
     """
     smtp_server = try_get_conf(config, EMAIL_SECTION_KEY, SMTP_SERVER_KEY)
     smtp_port = int(try_get_conf(config, EMAIL_SECTION_KEY, SMTP_PORT_KEY))
