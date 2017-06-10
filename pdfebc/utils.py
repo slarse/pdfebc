@@ -33,7 +33,6 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from collections import defaultdict
 import appdirs
-from . import cli
 
 CONFIG_FILENAME = 'config.cnf'
 CONFIG_PATH = os.path.join(appdirs.user_config_dir('pdfebc'), CONFIG_FILENAME)
