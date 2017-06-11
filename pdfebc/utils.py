@@ -323,5 +323,4 @@ def config_to_string(config):
         output.append("[{}]".format(section))
         for option, option_value in section_content.items():
             output.append("{} = {}".format(option, option_value))
-    print("\n".join(output))
     return "\n".join(output)
