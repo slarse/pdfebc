@@ -77,9 +77,9 @@ can be done like this:
     - Then execute ``source <path_to_config_file>``
 3. Currently, you must add the configuration file manually. Please have a look at the
    `sample configuration`_ file for details. To find out where to place the file, run 
-   ``pdfebc -h``. This should cause an error message to appear, and the last line will tell you
-   where the ``pdfebc`` is looking for the configuration file. This lazy way of handling this
-   will be fixed in version ``0.3.0``. **Note:** When using a Gmail account, I strongly recommend
+   ``pdfebc -h``. This should cause a message to appear, telling you where to put the file.
+   This lazy way of handling the setup of the configuration will be replaced with a step-by-step
+   config creator in version ``0.3.0``. **Note:** When using a Gmail account, I strongly recommend
    using an `App password`_ instead of the actual account password.
 4. Verify the installation by executing ``pdfebc -h``. You should see usage information printed to stdout,
    with no errors.
@@ -97,9 +97,9 @@ to PyPi. Unless you are planning to work on this yourself, I suggest going with 
     - For development, use ``pip install -e .`` in a ``virtualenv``.
 3. Currently, you must add the configuration file manually. Please have a look at the
    `sample configuration`_ file for details. To find out where to place the file, run 
-   ``pdfebc -h``. This should cause an error message to appear, and the last line will tell you
-   where the ``pdfebc`` is looking for the configuration file. This lazy way of handling this
-   will be fixed in version ``0.3.0``. **Note:** When using a Gmail account, I strongly recommend
+   ``pdfebc -h``. This should cause a message to appear, telling you where to put the file.
+   This lazy way of handling the setup of the configuration will be replaced with a step-by-step
+   config creator in version ``0.3.0``. **Note:** When using a Gmail account, I strongly recommend
    using an `App password`_ instead of the actual account password.
 4. Verify the installation by executing ``pdfebc -h``. You should see usage information printed to stdout,
    with no errors.
