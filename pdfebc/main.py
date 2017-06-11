@@ -35,7 +35,8 @@ def main():
     if args.configstatus:
         cli.diagnose_config()
         sys.exit(0)
-    os.makedirs(args.outdir)
+    if not os.path.isdir(args.outdir):
+        os.makedirs(args.outdir)
     filepaths = core.compress_multiple_pdfs(args.srcdir, args.outdir,
                                             args.ghostscript, cli.status_callback)
     if args.email:
