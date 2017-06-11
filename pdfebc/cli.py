@@ -50,7 +50,7 @@ Health: {}
 NO_CONFIG_FOUND = """No configuration file could be found.
 Please place one at: '{}'
 
-See 'https://github.com/slarse/pdfebc/readme.rst' for more information.
+See 'https://github.com/slarse/pdfebc' for more information.
 """
 
 CONFIG_CONTENTS = """
