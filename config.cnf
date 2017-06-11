@@ -1,0 +1,13 @@
+# Sample configuration file for pdfebc
+#
+# Leave the smtp_server and smtp_port options as they are if you intend to use Gmail.
+[EMAIL]
+user = youremail@gmail.com
+pass = passwordtoyouremail
+receiver = receiveremail@something.something
+smtp_server = smtp.gmail.com
+smtp_port = 587
+[DEFAULTS]
+gs_binary = gs
+src = .
+out = pdfebc_out
