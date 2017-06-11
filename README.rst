@@ -3,9 +3,6 @@ pdfebc - PDF ebook compressor
 
 `Docs`_
 
-.. image:: https://badge.fury.io/py/pdfebc.svg
-    :target: https://badge.fury.io/py/pdfebc
-    :alt: PyPi Version
 .. image:: https://travis-ci.org/slarse/pdfebc.svg?branch=master
     :target: https://travis-ci.org/slarse/pdfebc
     :alt: Build Status
@@ -15,6 +12,12 @@ pdfebc - PDF ebook compressor
 .. image:: https://readthedocs.org/projects/pdfebc/badge/?version=latest
     :target: http://pdfebc.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+.. image:: https://badge.fury.io/py/pdfebc.svg
+    :target: https://badge.fury.io/py/pdfebc
+    :alt: PyPi Version
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target: https://badge.fury.io/py/pdfebc
+    :alt: Supported Python Versions
 
 .. contents::
 
@@ -22,7 +25,7 @@ Overview
 ========
 ``pdfebc`` is a CLI tool that uses ``Ghostscript`` to compress PDF documents to a size that befits 
 an ebook reader, such as a Kindle. The CLI works by targeting a source and output directory (if 
-not specified by the user, defults to use ``.`` for source and ``pdfebc_out`` for output), then 
+not specified by the user, defults to use ``.`` for source and ``pdfebc_out`` for output), and then
 compresses all PDF files in the source directory and puts the results in the output directory. 
 There is also functionality for sending the compressed documents to a pre-configured e-mail 
 address using Google's SMTP server (which can easily be swapped for any SMTP server by editing 
@@ -40,7 +43,8 @@ The core functionality of ``pdfebc`` was already done when I started this little
 such, the main purpose here isn't to provide the functionality, but to do so in a robust way, 
 with proper documentation, testing and continuous integration. It is, essentially, my first 
 foray into using stuff like ``sphinx``, ``Travis-CI`` and ``ReadTheDocs``, so there's bound to be 
-some weirdness here and there.
+some weirdness here and there. I am also diving deeper into how to use ``git`` and trying new
+things, so the commit history is a bit inconsistent.
 
 Requirements
 ============
@@ -71,15 +75,19 @@ can be done like this:
     - If it is not, add it by adding ``export PATH="$PATH:$HOME/.local/bin`` to your shell configuration
       file (e.g. ``$HOME/.bashrc`` for ``bash``).
     - Then execute ``source <path_to_config_file>``
-3. Verify the installation by executing ``pdfebc -h``. You should se usage information printed to stdout.
-4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
-   of a configuration file. I strongly recommend that you use an `App password`_ instead of your actual 
-   account password.
+3. Currently, you must add the configuration file manually. Please have a look at the
+   `sample configuration`_ file for details. To find out where to place the file, run 
+   ``pdfebc -h``. This should cause a message to appear, telling you where to put the file.
+   This lazy way of handling the setup of the configuration will be replaced with a step-by-step
+   config creator in version ``0.3.0``. **Note:** When using a Gmail account, I strongly recommend
+   using an `App password`_ instead of the actual account password.
+4. Verify the installation by executing ``pdfebc -h``. You should see usage information printed to stdout,
+   with no errors.
 
 Option 2: Clone the repo and the install with ``pip``
 -----------------------------------------------------
 If you want the dev version, you will need to clone the repo, as only release versions are uploaded
-to PyPi. Unless you are planning to contribute something, I suggest going with the release version.
+to PyPi. Unless you are planning to work on this yourself, I suggest going with the release version.
 
 1. Clone the repo with ``git``:
     - ``git clone https://github.com/slarse/pdfebc``
@@ -87,14 +95,24 @@ to PyPi. Unless you are planning to contribute something, I suggest going with t
     - ``pip install --user .``, global installs are not recommended.
     - Or just ``pip install .`` if you use ``virtualenv``.
     - For development, use ``pip install -e .`` in a ``virtualenv``.
-3. All done! Type ``pdfebc -h`` on the command line for usage.
-4. Note that the first time you try to send an e-mail, the CLI will walk you through the creation
-   of a configuration file. I strongly recommend that you use an `App password`_ instead of your actual 
-   account password.
+3. Currently, you must add the configuration file manually. Please have a look at the
+   `sample configuration`_ file for details. To find out where to place the file, run 
+   ``pdfebc -h``. This should cause a message to appear, telling you where to put the file.
+   This lazy way of handling the setup of the configuration will be replaced with a step-by-step
+   config creator in version ``0.3.0``. **Note:** When using a Gmail account, I strongly recommend
+   using an `App password`_ instead of the actual account password.
+4. Verify the installation by executing ``pdfebc -h``. You should see usage information printed to stdout,
+   with no errors.
 
 License
 =======
 This software is licensed under the MIT License. See the `license file`_ file for specifics.
+
+Contributing
+============
+I am currently not looking for contributions. At this point, this is a practice project for me,
+and even if I were looking for outside help the test suite is nowhere near comprehensive enough
+for that yet. Sorry!
 
 TODO
 ====
@@ -104,3 +122,4 @@ TODO
 .. _Docs: http://pdfebc.readthedocs.io/en/latest/
 .. _App password: https://support.google.com/accounts/answer/185833?hl=en
 .. _license file: LICENSE
+.. _sample configuration: config.cnf
