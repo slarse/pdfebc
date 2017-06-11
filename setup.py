@@ -12,13 +12,13 @@ required = ['appdirs']
 
 setup(
     name='pdfebc',
-    version='0.1.2',
+    version='0.2.0',
     description='Application to compress PDF documents into an ebook reader-friendly size.',
     long_description=readme,
     author='Simon Larsén',
     author_email='slarse@kth.se',
     url='https://github.com/slarse/pdfebc',
-    download_url='https://github.com/slarse/pdfebc/archive/v0.1.2.tar.gz',
+    download_url='https://github.com/slarse/pdfebc/archive/v0.2.0.tar.gz',
     license=license,
     packages=find_packages(exclude=('tests', 'docs')),
     scripts=['bin/pdfebc'],
