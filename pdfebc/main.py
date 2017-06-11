@@ -23,6 +23,9 @@ Python error repr: {}
 Please open an issue about this error at 'https://github.com/slarse/pdfebc/issues'.
 """
 
+OUT_DIR_IS_FILE = """The specified output directory ({}) is a file!
+Please specify a path to either an existing directory, or to where you wish to create one."""
+
 
 def main():
     """Run PDFEBC."""
@@ -35,7 +38,11 @@ def main():
     if args.configstatus:
         cli.diagnose_config()
         sys.exit(0)
-    os.makedirs(args.outdir)
+    if os.path.isfile(args.outdir):
+        cli.status_callback(OUT_DIR_IS_FILE.format(args.outdir))
+        sys.exit(1)
+    if not os.path.isdir(args.outdir):
+        os.makedirs(args.outdir)
     filepaths = core.compress_multiple_pdfs(args.srcdir, args.outdir,
                                             args.ghostscript, cli.status_callback)
     if args.email:
