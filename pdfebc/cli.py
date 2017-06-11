@@ -9,6 +9,7 @@
 """
 import argparse
 import sys
+import os
 from . import utils
 
 OUT_DIR_DEFAULT = "pdfebc_out"
@@ -45,6 +46,11 @@ CONFIG_STATUS = """
 Location: '{}'
 
 Health: {}
+"""
+NO_CONFIG_FOUND = """No configuration file could be found.
+Please place one at: '{}'
+
+See 'https://github.com/slarse/pdfebc/readme.rst' for more information.
 """
 
 CONFIG_CONTENTS = """
@@ -128,6 +134,9 @@ def status_callback(status):
 
 def diagnose_config():
     """Print the results of the configuration diagnostics check."""
+    if not os.path.isfile(utils.CONFIG_PATH):
+        status_callback(NO_CONFIG_FOUND.format(utils.CONFIG_PATH))
+        return
     config = utils.read_config()
     config_path, missing_sections, malformed_entries = utils.run_config_diagnostics()
     output = []
