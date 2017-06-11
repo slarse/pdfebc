@@ -28,7 +28,7 @@ def main():
     """Run PDFEBC."""
     try:
         parser = cli.create_argparser()
-    except utils.ConfigurationError or IOError:
+    except (utils.ConfigurationError, IOError):
         cli.diagnose_config()
         sys.exit(1)
     args = parser.parse_args()
