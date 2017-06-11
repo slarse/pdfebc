@@ -108,6 +108,12 @@ License
 =======
 This software is licensed under the MIT License. See the `license file`_ file for specifics.
 
+Contributing
+============
+I am currently not looking for contributions. At this point, this is a practice project for me,
+and even if I were looking for outside help the test suite is nowhere near comprehensive enough
+for that yet. Sorry!
+
 TODO
 ====
 * Improve code coverage.
