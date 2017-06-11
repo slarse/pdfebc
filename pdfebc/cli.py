@@ -34,7 +34,7 @@ SEND_HELP = "Attempt to send the compressed PDF files with the settings in confi
 CLEAN_SHORT = "-c"
 CLEAN_LONG = "--clean"
 CLEAN_HELP = """Automatically remove output directory after finishing the program.
-Most useful in conjuction with --send."""
+Most useful in conjuction with {}.""".format(SEND_LONG)
 STATUS_SHORT = "-cs"
 STATUS_LONG = "--configstatus"
 STATUS_HELP = "Show the location and health of the configuration file."
