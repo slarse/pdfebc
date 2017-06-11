@@ -3,9 +3,6 @@ pdfebc - PDF ebook compressor
 
 `Docs`_
 
-.. image:: https://badge.fury.io/py/pdfebc.svg
-    :target: https://badge.fury.io/py/pdfebc
-    :alt: PyPi Version
 .. image:: https://travis-ci.org/slarse/pdfebc.svg?branch=master
     :target: https://travis-ci.org/slarse/pdfebc
     :alt: Build Status
@@ -15,6 +12,12 @@ pdfebc - PDF ebook compressor
 .. image:: https://readthedocs.org/projects/pdfebc/badge/?version=latest
     :target: http://pdfebc.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+.. image:: https://badge.fury.io/py/pdfebc.svg
+    :target: https://badge.fury.io/py/pdfebc
+    :alt: PyPi Version
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target: https://badge.fury.io/py/pdfebc
+    :alt: Supported Python Versions
 
 .. contents::
 
