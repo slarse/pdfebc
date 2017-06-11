@@ -180,7 +180,6 @@ def run_config_diagnostics(config_path=CONFIG_PATH):
             for option in expected_section_keys:
                 option_value = section_content.get(option)
                 if not option_value:
-                    print(option)
                     malformed_entries[section].add(option)
     return config_path, missing_sections, malformed_entries
 
@@ -310,3 +309,19 @@ def if_callable_call_with_formatted_string(callback, formattable_string, *args):
                          "and the amount of args given.")
     if callable(callback):
         callback(formatted_string)
+
+def config_to_string(config):
+    """Nice output string for the config, which is a nested defaultdict.
+
+    Args:
+        config (defaultdict(defaultdict)): The configuration information.
+    Returns:
+        str: A human-readable output string detailing the contents of the config.
+    """
+    output = []
+    for section, section_content in config.items():
+        output.append("[{}]".format(section))
+        for option, option_value in section_content.items():
+            output.append("{} = {}".format(option, option_value))
+    print("\n".join(output))
+    return "\n".join(output)

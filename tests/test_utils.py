@@ -296,3 +296,18 @@ class UtilsTest(unittest.TestCase):
         expected_missing_email_options = self.email_section_keys - {self.user_key, self.password_key}
         self.assertEqual({self.default_section_key}, missing_sections)
         self.assertEqual(expected_missing_email_options, malformed_entries[self.email_section_key])
+
+    def test_confg_to_string(self):
+        gs_binary_default = "gs"
+        section_string = "[{}]"
+        option_string = "{} = {}"
+        config = {self.default_section_key: {self.gs_binary_default_key: gs_binary_default},
+                 self.email_section_key: {self.user_key: self.user, self.password_key: self.password}}
+        expected_output = "\n".join([section_string.format(self.default_section_key),
+                           option_string.format(self.gs_binary_default_key, gs_binary_default),
+                           section_string.format(self.email_section_key),
+                           option_string.format(self.user_key, self.user),
+                           option_string.format(self.password_key, self.password)])
+        print(expected_output)
+        actual_output = pdfebc.utils.config_to_string(config)
+        self.assertEqual(expected_output, actual_output)

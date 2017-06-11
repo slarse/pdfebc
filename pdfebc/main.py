@@ -23,17 +23,18 @@ Python error repr: {}
 Please open an issue about this error at 'https://github.com/slarse/pdfebc/issues'.
 """
 
+
 def main():
     """Run PDFEBC."""
     try:
         parser = cli.create_argparser()
-    except utils.ConfigurationError as e:
-        print("FIRST TIME CONFIG NOT YET IMPLEMENTED")
-        print("FIX THE CONFIG FILE!")
-        print("EXITING!")
-        print(e)
+    except utils.ConfigurationError or IOError:
+        cli.diagnose_config()
         sys.exit(1)
     args = parser.parse_args()
+    if args.configstatus:
+        cli.diagnose_config()
+        sys.exit(0)
     os.makedirs(args.outdir)
     filepaths = core.compress_multiple_pdfs(args.srcdir, args.outdir,
                                             args.ghostscript, cli.status_callback)

@@ -38,6 +38,37 @@ STATUS_SHORT = "-cs"
 STATUS_LONG = "--configstatus"
 STATUS_HELP = "Show the location and health of the configuration file."
 
+CONFIG_STATUS = """
+#############################
+# CONFIGURATION FILE STATUS #
+#############################
+Location: '{}'
+
+Health: {}
+"""
+
+CONFIG_CONTENTS = """
+Configuration currently looks like this:
+{start}
+{}
+{end}
+"""
+CONFIG_HEALTHY = "The configuration file is correctly formatted!"
+CONFIG_NOT_HEALTHY = "The configuration file contains errors!"
+MISSING_SECTIONS = """The following sections are missing or empty:
+--------------------------------------------
+{}
+--------------------------------------------
+"""
+MALFORMED_ENTRIES = """The following sections contain entries that missing or malformed:
+-----------------------------------------------------------------
+{}
+-----------------------------------------------------------------
+"""
+
+START_CONFIG = "START-CONFIG".center(50).replace(" ", "-")
+END_CONFIG = "END-CONFIG".center(50).replace(" ", "-")
+
 def create_argparser():
     """
     Returns:
@@ -94,3 +125,25 @@ def status_callback(status):
         status (str): A status message.
     """
     print(status + "\n")
+
+def diagnose_config():
+    """Print the results of the configuration diagnostics check."""
+    config = utils.read_config()
+    config_path, missing_sections, malformed_entries = utils.run_config_diagnostics()
+    output = []
+    if not missing_sections and not malformed_entries:
+        output.append(CONFIG_STATUS.format(config_path, CONFIG_HEALTHY))
+    else:
+        output.append(CONFIG_STATUS.format(config_path, CONFIG_NOT_HEALTHY))
+        if missing_sections:
+            missing = MISSING_SECTIONS.format("\n".join(missing_sections))
+            output.append(missing)
+        if malformed_entries:
+            malformed = []
+            for section, options in malformed_entries.items():
+                malformed.append("\n".join(["[{}]".format(section), *options]))
+            output.append(MALFORMED_ENTRIES.format("\n".join(malformed)))
+    config_string = utils.config_to_string(config)
+    config_contents = CONFIG_CONTENTS.format(config_string, start=START_CONFIG, end=END_CONFIG)
+    output.append(config_contents)
+    status_callback("\n\n".join(output))
