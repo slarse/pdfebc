@@ -13,6 +13,11 @@ The config file should have the following format:
     |receiver = <receiver_email>
     |smtp_server = <smtp_server>
     |smtp_port = <smtp_port>
+    |
+    |[DEFAULTS]
+    |gs_binary = <ghostscript_binary>
+    |src = <source_dir>
+    |out = <out_dir>
 
 .. module:: utils
     :platform: Unix
@@ -26,8 +31,8 @@ import configparser
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
+from collections import defaultdict
 import appdirs
-from . import cli
 
 CONFIG_FILENAME = 'config.cnf'
 CONFIG_PATH = os.path.join(appdirs.user_config_dir('pdfebc'), CONFIG_FILENAME)
@@ -60,24 +65,6 @@ FILES_SENT = "Files successfully sent!"""
 
 class ConfigurationError(configparser.ParsingError):
     pass
-
-def create_email_config(user, password, receiver):
-    """Create an email config.
-
-    Args:
-        user (str): User e-mail address.
-        password (str): Password to user e-mail address.
-        receiver: Reciever e-mail address.
-
-    Returns:
-        configparser.ConfigParser: A ConfigParser
-    """
-    config = configparser.ConfigParser()
-    config[EMAIL_SECTION_KEY] = {
-        USER_KEY: user,
-        PASSWORD_KEY: password,
-        RECEIVER_KEY: receiver}
-    return config
 
 def create_config(sections, section_contents):
     """Create a config file from the provided sections and key value pairs.
@@ -121,22 +108,35 @@ def read_config(config_path=CONFIG_PATH):
     Args:
         config_path (str): Relative path to the email config file.
     Returns:
-        configparser.ConfigParser: A ConfigParser with the config information.
+        defaultdict: A defaultdict with the config information.
     Raises:
         IOError
     """
     if not os.path.isfile(config_path):
         raise IOError("No config file found at %s" % config_path)
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    check_config(config)
+    config_parser = configparser.ConfigParser()
+    config_parser.read(config_path)
+    config = config_parser_to_defaultdict(config_parser)
+    return config
+
+def config_parser_to_defaultdict(config_parser):
+    """Convert a ConfigParser to a defaultdict.
+
+    Args:
+        config_parser (ConfigParser): A ConfigParser.
+    """
+    config = defaultdict(defaultdict)
+    for section, section_content in config_parser.items():
+        if section != 'DEFAULT':
+            for option, option_value in section_content.items():
+                config[section][option] = option_value
     return config
 
 def section_is_healthy(section, expected_keys):
     """Check that the section contains all keys it should.
 
     Args:
-        section (configparser.SectionProxy): A map-like object.
+        section (defaultdict): A defaultdict.
         expected_keys (Iterable): A Set of keys that should be contained in the section.
     Returns:
         boolean: True if the section is healthy, false if not.
@@ -147,25 +147,47 @@ def check_config(config):
     """Check that all sections of the config contain the keys that they should.
 
     Args:
-        config (configparser.ConfigParser): A ConfigParser.
+        config (defaultdict): A defaultdict.
     Raises:
         ConfigurationError
     """
     for section, expected_section_keys in SECTION_KEYS.items():
-        try:
-            section_content = config[section]
-            if not section_is_healthy(section_content, expected_section_keys):
-                raise ConfigurationError("The {} section of the configuration file is badly formed!"
-                                         .format(section))
-        except KeyError as e:
+        section_content = config.get(section)
+        if not section_content:
             raise ConfigurationError("Config file badly formed! Section {} is missing."
                                      .format(section))
+        elif not section_is_healthy(section_content, expected_section_keys):
+            raise ConfigurationError("The {} section of the configuration file is badly formed!"
+                                     .format(section))
+
+def run_config_diagnostics(config_path=CONFIG_PATH):
+    """Run diagnostics on the configuration file.
+
+    Args:
+        config_path (str): Path to the configuration file.
+    Returns:
+        str, Set[str], dict(str, Set[str]): The path to the configuration file, a set of missing sections
+        and a dict that maps each section to the entries that have either missing or empty options.
+    """
+    config = read_config(config_path)
+    missing_sections = set()
+    malformed_entries = defaultdict(set)
+    for section, expected_section_keys in SECTION_KEYS.items():
+        section_content = config.get(section)
+        if not section_content:
+            missing_sections.add(section)
+        else:
+            for option in expected_section_keys:
+                option_value = section_content.get(option)
+                if not option_value:
+                    malformed_entries[section].add(option)
+    return config_path, missing_sections, malformed_entries
 
 def try_get_conf(config, section, attribute):
     """Try to parse an attribute of the config file.
 
     Args:
-        config (configparser.ConfigParser): A ConfigParser.
+        config (defaultdict): A defaultdict.
         section (str): The section of the config file to get information from.
         attribute (str): The attribute of the section to fetch.
     Returns:
@@ -173,12 +195,14 @@ def try_get_conf(config, section, attribute):
     Raises:
         ConfigurationError
     """
-    try:
-        return config[section][attribute]
-    except KeyError:
-        raise ConfigurationError("Config file badly formed!\n"
-                                 "Failed to get attribute '{}' from section '{}'!"
-                                 .format(attribute, section))
+    section = config.get(section)
+    if section:
+        option = section.get(attribute)
+        if option:
+            return option
+    raise ConfigurationError("Config file badly formed!\n"
+                             "Failed to get attribute '{}' from section '{}'!"
+                             .format(attribute, section))
 
 def send_with_attachments(subject, message, filepaths, config):
     """Send an email from the user (a gmail) to the receiver.
@@ -187,7 +211,7 @@ def send_with_attachments(subject, message, filepaths, config):
         subject (str): Subject of the email.
         message (str): A message.
         filepaths (list(str)): Filepaths to files to be attached.
-        config (configparser.ConfigParser): A ConfigParser.
+        config (defaultdict): A defaultdict.
     """
     email_ = MIMEMultipart()
     email_.attach(MIMEText(message))
@@ -217,7 +241,7 @@ def send_email(email_, config):
 
     Args:
         email_ (email.MIMEMultipart): The email to send.
-        config (configparser.ConfigParser): A ConfigParser.
+        config (defaultdict): A defaultdict.
     """
     smtp_server = try_get_conf(config, EMAIL_SECTION_KEY, SMTP_SERVER_KEY)
     smtp_port = int(try_get_conf(config, EMAIL_SECTION_KEY, SMTP_PORT_KEY))
@@ -258,7 +282,8 @@ def valid_config_exists(config_path=CONFIG_PATH):
     """
     if (os.path.isfile(config_path)):
         try:
-            read_config(config_path)
+            config = read_config(config_path)
+            check_config(config)
         except ConfigurationError or IOError:
             return False
     else:
@@ -284,3 +309,19 @@ def if_callable_call_with_formatted_string(callback, formattable_string, *args):
                          "and the amount of args given.")
     if callable(callback):
         callback(formatted_string)
+
+def config_to_string(config):
+    """Nice output string for the config, which is a nested defaultdict.
+
+    Args:
+        config (defaultdict(defaultdict)): The configuration information.
+    Returns:
+        str: A human-readable output string detailing the contents of the config.
+    """
+    output = []
+    for section, section_content in config.items():
+        output.append("[{}]".format(section))
+        for option, option_value in section_content.items():
+            output.append("{} = {}".format(option, option_value))
+    print("\n".join(output))
+    return "\n".join(output)

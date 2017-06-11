@@ -23,26 +23,25 @@ Python error repr: {}
 Please open an issue about this error at 'https://github.com/slarse/pdfebc/issues'.
 """
 
+
 def main():
     """Run PDFEBC."""
     try:
         parser = cli.create_argparser()
-    except utils.ConfigurationError as e:
-        print("FIRST TIME CONFIG NOT YET IMPLEMENTED")
-        print("FIX THE CONFIG FILE!")
-        print("EXITING!")
-        print(e)
+    except utils.ConfigurationError or IOError:
+        cli.diagnose_config()
         sys.exit(1)
     args = parser.parse_args()
-    if not args.nomakedir:
-        os.makedirs(args.outdir)
-    filepaths = core.compress_multiple_pdfs(args.sourcedir, args.outdir,
+    if args.configstatus:
+        cli.diagnose_config()
+        sys.exit(0)
+    os.makedirs(args.outdir)
+    filepaths = core.compress_multiple_pdfs(args.srcdir, args.outdir,
                                             args.ghostscript, cli.status_callback)
-    if args.send:
+    if args.email:
         if not utils.valid_config_exists():
-            user, password, receiver = cli.prompt_for_config_values()
-            config = utils.create_email_config(user, password, receiver)
-            utils.write_config(config)
+            # TODO Add step-by-step config creation here.
+            pass
         try:
             utils.send_files_preconf(filepaths, status_callback=cli.status_callback)
         except smtplib.SMTPAuthenticationError as e:
